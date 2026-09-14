@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
-# Comprime source/logo.glb (9.6 MB) para public/models/logo.glb.
+# Comprime o GLB de origem para public/models/logo.glb.
+# Uso: scripts/optimize-model.sh [arquivo.glb]  (padrao: source/logo2.glb)
 #   prune  - remove as UVs nao usadas (o modelo nao tem nenhuma textura)
 #   weld   - funde vertices duplicados
-#   join   - 32 primitives -> 1 por material (2 draw calls)
+#   join   - junta as primitives em 1 por material (2 draw calls)
 #   dedup  - remove accessors repetidos
 #   meshopt- quantiza + EXT_meshopt_compression
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-SRC=source/logo.glb
+SRC="${1:-source/logo2.glb}"
 OUT=public/models/logo.glb
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
