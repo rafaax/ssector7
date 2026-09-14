@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>SSECTOR7</title>
+    <meta name="description" content="Logo 3D da SSECTOR7." />
+    <meta name="theme-color" content="#07090c" />
+    <link rel="icon" href="/logo.png" />
+    <meta property="og:title" content="SSECTOR7" />
+    <meta property="og:description" content="Logo 3D da SSECTOR7." />
+    <meta property="og:image" content="/logo.png" />
+    <link rel="preload" as="fetch" href="/models/logo.glb" crossorigin />
+  </head>
+  <body>
+    <div id="stage" class="stage"></div>
+
+    <div id="loader" class="loader">
+      <div class="loader__bar"><span id="loader-fill" class="loader__fill"></span></div>
+      <p id="loader-label" class="loader__label">carregando</p>
+    </div>
+
+    <noscript class="fallback"><img src="/logo.png" alt="SSECTOR7" /></noscript>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

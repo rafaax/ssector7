@@ -1,0 +1,121 @@
+:root {
+  --bg: #07090c;
+  --fg: #8b99a6;
+  --backdrop: radial-gradient(120% 80% at 50% 38%, #151c26 0%, #0b0f15 45%, var(--bg) 100%);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* O html leva a cor chapada e o body leva o gradiente: com o html pintado, o
+   fundo do body deixa de ser propagado para o canvas da pagina e vira um
+   backdrop de verdade - e o mix-blend-mode do fallback passa a compor com ele. */
+html {
+  background: var(--bg);
+}
+
+body {
+  isolation: isolate;
+  background: var(--backdrop);
+  color: var(--fg);
+  font: 400 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.18em;
+  text-transform: lowercase;
+}
+
+.stage {
+  position: fixed;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 900ms ease;
+}
+
+.stage.is-ready {
+  opacity: 1;
+}
+
+.stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+/* overlay de carregamento */
+.loader {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  background: var(--backdrop);
+  transition: opacity 600ms ease;
+}
+
+.loader.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loader__bar {
+  width: min(180px, 46vw);
+  height: 1px;
+  background: #1d2430;
+  overflow: hidden;
+}
+
+.loader__fill {
+  display: block;
+  width: 0%;
+  height: 100%;
+  background: #cfd8e0;
+  transition: width 200ms linear;
+}
+
+.loader__label {
+  margin: 0;
+  font-size: 10px;
+}
+
+/* sem WebGL / sem JS: mostra o logo 2D */
+.fallback {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  padding: 24px;
+  /* o png tem fundo preto chapado; screen funde ele no gradiente.
+     Vai no wrapper (que e position:fixed, logo um contexto de empilhamento
+     proprio): dentro dele a img so comporia com um backdrop transparente. */
+  mix-blend-mode: screen;
+}
+
+.fallback img {
+  max-width: min(720px, 90vw);
+  height: auto;
+}
+
+.fallback__note {
+  margin: 18px 0 0;
+  text-align: center;
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage,
+  .loader {
+    transition-duration: 1ms;
+  }
+}
