@@ -3,3 +3,7 @@ dist/
 .vite/
 .DS_Store
 .wrangler/
+
+# exports do 3D: so o .glb entra no repo, o .obj e a mesma malha em texto (45 MB)
+source/*.obj
+source/*.mtl
