@@ -1,9 +1,14 @@
-# Cache no Cloudflare Pages.
-# /assets/* leva hash no nome a cada build - JS, CSS e o modelo 3D.
-# Trocar qualquer um deles muda o nome do arquivo, entao o cache pode ser
-# imutavel: quem ja visitou recebe a versao nova na hora, sem purge.
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
 /logo.png
+  Cache-Control: public, max-age=86400
+
+/logo_light.png
+  Cache-Control: public, max-age=86400
+
+/logo_black_transparent.png
+  Cache-Control: public, max-age=86400
+
+/favicons/*
   Cache-Control: public, max-age=86400
