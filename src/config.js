@@ -1,11 +1,12 @@
 // Todos os numeros ajustaveis da cena ficam aqui.
 
 export const config = {
-  // O canvas e transparente: o fundo vem do gradiente CSS em style.css.
-  // Este valor so alimenta o clear color quando o gradiente nao aparece.
-  background: 0x07090c,
+  // Tema ativo. 'dark' reproduz o logo.png: fundo preto, letra preta (o miolo
+  // da letra nao e geometria - e o fundo aparecendo) e contorno branco.
+  // 'light' e o inverso, para a fase 2. Trocar aqui muda a cena e o CSS junto.
+  theme: 'dark',
 
-  toneMappingExposure: 1.15,
+  toneMappingExposure: 1.0,
 
   camera: {
     fov: 35,
@@ -33,24 +34,74 @@ export const config = {
   },
 
   lights: {
-    key: { color: 0xffffff, intensity: 3.0, position: { x: 2, y: 3, z: 2.5 } },
-    rim: { color: 0x9fc4ff, intensity: 2.6, position: { x: -2.5, y: 1.2, z: -2 } },
-    fill: { color: 0x2a3644, intensity: 1.2 },
+    // Luz baixa de proposito: as paredes devem ficar quase na cor do fundo,
+    // como a letra preta do logo.png. So o contorno emissivo salta.
+    key: { color: 0xffffff, intensity: 1.6, position: { x: 2, y: 3, z: 2.5 } },
+    rim: { color: 0xffffff, intensity: 1.2, position: { x: -2.5, y: 1.2, z: -2 } },
+    fill: { color: 0xffffff, intensity: 0.2 },
   },
 
-  // sobrescreve o que veio do exportador: metallic 0.32 nao le como cromo
-  materials: {
-    chrome_face: {
-      color: 0xe8eff5,
-      metalness: 0.95,
-      roughness: 0.12,
-      envMapIntensity: 2.4,
+  /**
+   * Cada tema descreve os dois papeis da malha:
+   *   outline - as faces da frente e de tras da extrusao (material chrome_face
+   *             no GLB). Vistas de frente, sao exatamente o contorno do logo.
+   *   body    - as paredes laterais da extrusao (material steel_edge). Ficam
+   *             na cor do fundo, para a peca ler como massa chapada e so o
+   *             contorno saltar, como no logo.png.
+   * `background` alimenta a meta theme-color; o fundo visivel vem do CSS.
+   */
+  themes: {
+    dark: {
+      background: 0x07090c,
+      // Sem environment map: o RoomEnvironment e claro demais e lava a parede
+      // escura (mesmo a 8% de intensidade ela subia de 1 para 29/255).
+      // Aqui o visual e grafico e chapado, quem ilumina sao so as luzes.
+      environment: false,
+      // Sem tonemapping o branco emissivo sai exatamente 255, como no png.
+      toneMapping: 'none',
+      outline: {
+        color: 0xffffff,
+        emissive: 0xffffff,
+        emissiveIntensity: 1.0,
+        metalness: 0.0,
+        roughness: 0.4,
+        envMapIntensity: 0.3,
+      },
+      body: {
+        color: 0x0b0d10,
+        emissive: 0x000000,
+        emissiveIntensity: 0.0,
+        metalness: 0.0,
+        roughness: 0.95,
+        envMapIntensity: 0.08,
+      },
     },
-    steel_edge: {
-      color: 0x3c4753,
-      metalness: 0.85,
-      roughness: 0.34,
-      envMapIntensity: 1.6,
+
+    // Fase 2: fundo branco, letra branca, contorno preto.
+    light: {
+      background: 0xf7f7f8,
+      // No tema claro a massa e branca: o environment ajuda a modelar a forma.
+      environment: true,
+      toneMapping: 'aces',
+      outline: {
+        color: 0x000000,
+        emissive: 0x000000,
+        emissiveIntensity: 0.0,
+        metalness: 0.0,
+        roughness: 0.5,
+        envMapIntensity: 0.1,
+      },
+      body: {
+        color: 0xf2f3f5,
+        emissive: 0x000000,
+        emissiveIntensity: 0.0,
+        metalness: 0.0,
+        roughness: 0.9,
+        envMapIntensity: 0.35,
+      },
     },
   },
 };
+
+/** Preset do tema ativo, ja resolvido. */
+export const theme = config.themes[config.theme];

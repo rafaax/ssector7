@@ -1,8 +1,27 @@
-:root {
+/* Tema escuro (fase 1): fundo preto, contorno branco - igual ao logo.png.
+   O tema e escolhido em src/config.js, que escreve data-theme no <html>. */
+:root,
+:root[data-theme='dark'] {
   --bg: #07090c;
   --fg: #8b99a6;
-  --backdrop: radial-gradient(120% 80% at 50% 38%, #151c26 0%, #0b0f15 45%, var(--bg) 100%);
+  --backdrop: radial-gradient(120% 80% at 50% 38%, #14161a 0%, #0a0b0d 45%, var(--bg) 100%);
+  --loader-track: #1d2430;
+  --loader-fill: #cfd8e0;
+  --fallback-blend: screen; /* o png e linha branca sobre preto */
   color-scheme: dark;
+}
+
+/* Tema claro (fase 2): fundo branco, contorno preto. */
+:root[data-theme='light'] {
+  --bg: #f7f7f8;
+  --fg: #6b7480;
+  --backdrop: radial-gradient(120% 80% at 50% 38%, #ffffff 0%, #f2f3f5 45%, var(--bg) 100%);
+  --loader-track: #dcdfe4;
+  --loader-fill: #2b3038;
+  /* o logo.png atual e branco sobre preto; no tema claro o fallback precisa
+     de uma versao invertida do png para compor bem com multiply */
+  --fallback-blend: multiply;
+  color-scheme: light;
 }
 
 * {
@@ -70,7 +89,7 @@ body {
 .loader__bar {
   width: min(180px, 46vw);
   height: 1px;
-  background: #1d2430;
+  background: var(--loader-track);
   overflow: hidden;
 }
 
@@ -78,7 +97,7 @@ body {
   display: block;
   width: 0%;
   height: 100%;
-  background: #cfd8e0;
+  background: var(--loader-fill);
   transition: width 200ms linear;
 }
 
@@ -95,10 +114,10 @@ body {
   place-content: center;
   justify-items: center;
   padding: 24px;
-  /* o png tem fundo preto chapado; screen funde ele no gradiente.
+  /* o png tem fundo chapado; o blend funde ele no gradiente.
      Vai no wrapper (que e position:fixed, logo um contexto de empilhamento
      proprio): dentro dele a img so comporia com um backdrop transparente. */
-  mix-blend-mode: screen;
+  mix-blend-mode: var(--fallback-blend);
 }
 
 .fallback img {

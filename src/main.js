@@ -2,7 +2,7 @@ import WebGL from 'three/addons/capabilities/WebGL.js';
 import { createStage } from './renderer.js';
 import { setupEnvironment } from './environment.js';
 import { loadLogo } from './loadLogo.js';
-import { config } from './config.js';
+import { config, theme } from './config.js';
 import modelUrl from './assets/logo.glb?url';
 import './style.css';
 
@@ -12,7 +12,16 @@ const loaderFill = document.getElementById('loader-fill');
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+applyTheme();
 main();
+
+/** Escreve o tema escolhido no <html>, de onde o CSS tira as cores do fundo. */
+function applyTheme() {
+  document.documentElement.dataset.theme = config.theme;
+
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = `#${theme.background.toString(16).padStart(6, '0')}`;
+}
 
 async function main() {
   if (!WebGL.isWebGL2Available()) {
@@ -39,6 +48,9 @@ async function main() {
   stage.frameObject(logo);
 
   registerIntro(stage, logo);
+
+  // Handle de depuracao: so existe em `npm run dev`, nao vai para o build.
+  if (import.meta.env.DEV) window.__ssector7 = { stage, logo, config, theme };
 
   loaderFill.style.width = '100%';
   loaderEl.classList.add('is-hidden');
