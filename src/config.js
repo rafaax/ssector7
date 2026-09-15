@@ -41,6 +41,69 @@ export const config = {
     fromSpin: -0.9, // radianos a mais no inicio da animacao de entrada
   },
 
+  /**
+   * O botao 3D que leva ao about. Tudo em unidades de mundo, com o logo
+   * centrado na origem medindo 1.87 de largura por 0.64 de altura.
+   * `depth` e a espessura do logo (0.0236), para o botao parecer recortado da
+   * mesma chapa; `tracking` acompanha o letter-spacing largo do CSS.
+   */
+  button: {
+    label: 'about us',
+    size: 0.072,
+    depth: 0.0236,
+    tracking: 0.24,
+    position: { x: 0, y: -0.5, z: 0 },
+    // quanto o botao cresce no hover, e em quanto tempo
+    hover: { scale: 1.08, duration: 0.18 },
+  },
+
+  /**
+   * A sala do about: um lugar atras do logo, no eixo Z.
+   * `distance` e o quanto ela fica atras do plano do logo (que esta em z=0).
+   */
+  room: {
+    distance: 5,
+    height: 0.95,
+    /**
+     * A moldura acompanha a proporcao da janela, dentro desses limites. Uma
+     * moldura deitada fixa viraria uma tarja no meio da tela num celular em pe,
+     * com o texto derramando para fora dela.
+     */
+    aspect: { min: 0.62, max: 1.6 },
+    corner: 0.16, // comprimento de cada bracete de canto
+    // o rotulo de volta, dentro da moldura, rente a borda de baixo
+    back: { label: 'voltar', size: 0.026, inset: 0.075 },
+    // mais folga que o logo: os bracetes precisam respirar longe da borda
+    fitOffset: 1.32,
+  },
+
+  /**
+   * O voo entre estacoes.
+   * `arc` desloca o ponto de controle da curva: e ele que faz a camera subir e
+   * passar por cima do logo (borda em y=0.32) em vez de atravessar a geometria
+   * em linha reta - nada de clipping contra o near plane. Zerar o Y faz a
+   * camera furar a peca, se um dia essa for a leitura desejada.
+   * `fovPunch` e um empurrao de campo de visao no meio do trajeto: custa nada e
+   * e o que faz a travessia parecer velocidade em vez de um corte.
+   */
+  flight: {
+    duration: 1.8,
+    arc: { x: 0, y: 0.9, z: 0 },
+    fovPunch: 6,
+  },
+
+  /**
+   * Poeira no corredor entre a home e a sala. `zNear`/`zFar` cobrem a
+   * trajetoria inteira (o logo esta em z=0 e a sala em z=-5); `fade` e o tempo
+   * de acender e apagar.
+   */
+  particles: {
+    count: 2800,
+    size: 0.021,
+    spread: { x: 2.8, y: 1.8, zNear: 2.5, zFar: -8.5 },
+    fade: 0.8,
+  },
+
   lights: {
     // Luz baixa de proposito: as paredes devem ficar quase na cor do fundo,
     // como a letra preta do logo.png. So o contorno emissivo salta.
@@ -92,6 +155,21 @@ export const config = {
         roughness: 0.95,
         envMapIntensity: 0.08,
       },
+      /**
+       * Papel `ui`: tudo que nao e o logo - o botao, a moldura da sala e as
+       * particulas.
+       *   dim  - cor de repouso do texto interativo. E o mesmo --fg do CSS,
+       *          para o 3D e o HTML falarem com a mesma voz.
+       *   line - cor no hover/foco. O salto de dim para line e o feedback.
+       * O logo fica sozinho no branco puro emissivo: e ele o heroi, o botao e
+       * subordinado.
+       */
+      ui: {
+        line: 0xffffff,
+        dim: 0x8b99a6,
+        particle: 0xffffff,
+        particleOpacity: 0.8,
+      },
     },
 
     // Fase 2: fundo branco, letra branca, contorno preto.
@@ -122,6 +200,12 @@ export const config = {
         metalness: 0.0,
         roughness: 0.9,
         envMapIntensity: 0.35,
+      },
+      ui: {
+        line: 0x000000,
+        dim: 0x6b7480,
+        particle: 0x2b3038,
+        particleOpacity: 0.4,
       },
     },
   },

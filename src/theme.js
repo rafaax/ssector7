@@ -1,7 +1,6 @@
 import { ACESFilmicToneMapping, NoToneMapping } from 'three';
 import { config } from './config.js';
 import { applyEnvironment } from './environment.js';
-import { applyMaterials } from './loadLogo.js';
 
 /**
  * Qual tema vale num dado instante.
@@ -62,7 +61,7 @@ function setIcon(id, file, sizes) {
  *
  * @returns {{ setTheme: (name: string) => void, current: () => string, stop: () => void }}
  */
-export function startTheme({ stage, logo }) {
+export function startTheme({ stage, world }) {
   let currentName = null;
   let timer = null;
 
@@ -79,7 +78,7 @@ export function startTheme({ stage, logo }) {
       preset.toneMapping === 'aces' ? ACESFilmicToneMapping : NoToneMapping;
 
     applyEnvironment(stage.renderer, stage.scene, preset);
-    applyMaterials(logo, preset);
+    world.applyTheme(preset);
 
     // a cena so desenha quando algo muda - sem isto a troca nao apareceria
     stage.invalidate();

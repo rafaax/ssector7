@@ -140,3 +140,75 @@ body {
     transition-duration: 1ms;
   }
 }
+
+/* camada de HTML por cima da cena */
+.ui {
+  position: fixed;
+  inset: 0;
+  /* o layer inteiro e transparente ao ponteiro para o arrasto da cena
+     continuar funcionando; so o texto do about volta a receber eventos */
+  pointer-events: none;
+}
+
+/* Espelho acessivel de um rotulo 3D: existe para o Tab, nao para o olho.
+   Quem sinaliza o foco e o proprio rotulo na cena, que acende. */
+.nav-mirror {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* O bloco do about. Posicao e largura vem do JS, que projeta a moldura 3D na
+   tela - por isso o tamanho do texto e relativo ao container (cqw) e nao a
+   viewport: o texto encolhe junto com a moldura quando a camera se afasta. */
+.room {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  container-type: inline-size;
+  /* so as laterais: padding vertical em % resolve contra a LARGURA do bloco,
+     entao um valor unico deslocaria o texto de um jeito no desktop e de outro
+     no celular. O equilibrio vertical vem do proprio 3D - o bloco e centrado
+     na moldura, e o "voltar" ancora a base. */
+  padding: 0 5%;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 700ms ease, visibility 0s linear 700ms;
+}
+
+.room.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 700ms ease 120ms, visibility 0s;
+}
+
+.room__title {
+  margin: 0 0 3.5cqw;
+  font-size: clamp(12px, 4.2cqw, 26px);
+  font-weight: 400;
+  letter-spacing: 0.34em;
+  color: var(--loader-fill);
+}
+
+.room__text {
+  margin: 0 auto 2.6cqw;
+  max-width: 52ch;
+  font-size: clamp(11px, 3.2cqw, 17px);
+  line-height: 1.95;
+  letter-spacing: 0.1em;
+  text-transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room,
+  .room.is-active {
+    transition-duration: 1ms;
+  }
+}
