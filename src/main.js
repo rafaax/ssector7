@@ -40,18 +40,20 @@ async function main() {
   stage.frameObject(logo);
 
   registerIntro(stage, logo);
-  registerAutoRotation(stage, logo);
 
   loaderFill.style.width = '100%';
   loaderEl.classList.add('is-hidden');
   container.classList.add('is-ready');
 }
 
-/** Entrada: escala e giro convergindo para o repouso, com ease-out. */
+/**
+ * Entrada: escala e giro convergindo para o repouso, com ease-out.
+ * Roda uma vez e se remove; depois disso o logo so se mexe pelo mouse.
+ */
 function registerIntro(stage, logo) {
   const { duration, fromScale, fromSpin } = config.intro;
 
-  if (prefersReducedMotion) {
+  if (prefersReducedMotion || duration <= 0) {
     logo.scale.setScalar(1);
     return;
   }
@@ -68,44 +70,6 @@ function registerIntro(stage, logo) {
     logo.rotation.y = fromSpin * (1 - t);
 
     if (elapsed >= duration) stop();
-  });
-}
-
-/**
- * Rotacao automatica no eixo Y + oscilacao sutil no X.
- * Pausa enquanto o usuario arrasta e volta depois de `resumeDelay` parado.
- */
-function registerAutoRotation(stage, logo) {
-  if (prefersReducedMotion) return;
-
-  const { speed, tiltAmplitude, tiltPeriod, resumeDelay } = config.autoRotate;
-  const introEnd = config.intro.duration;
-
-  let idleFor = resumeDelay;
-  let interacting = false;
-
-  stage.controls.addEventListener('start', () => {
-    interacting = true;
-    idleFor = 0;
-  });
-  stage.controls.addEventListener('end', () => {
-    interacting = false;
-    idleFor = 0;
-  });
-
-  stage.registerUpdate((delta, elapsed) => {
-    if (elapsed < introEnd) return; // deixa a animacao de entrada terminar
-
-    if (interacting) {
-      idleFor = 0;
-    } else {
-      idleFor = Math.min(idleFor + delta, resumeDelay);
-    }
-
-    // volta a girar suavemente em vez de ligar de uma vez
-    const weight = easeOutCubic(idleFor / resumeDelay);
-    logo.rotation.y += speed * weight * delta;
-    logo.rotation.x = Math.sin((elapsed / tiltPeriod) * Math.PI * 2) * tiltAmplitude * weight;
   });
 }
 

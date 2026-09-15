@@ -18,6 +18,10 @@ import { config } from './config.js';
  * O loop expoe `registerUpdate(fn)`: cada fn recebe (delta, elapsed) por frame.
  * E esse o ponto de extensao para animacoes futuras - nada mais precisa mudar
  * aqui para adicionar comportamento novo.
+ *
+ * A cena e estatica em repouso, entao o loop so desenha quando ha motivo:
+ * algum update registrado, a camera se movendo (arrasto, zoom, damping) ou um
+ * `invalidate()` explicito. Parado, o custo de GPU por frame e zero.
  */
 export function createStage(container) {
   const scene = new Scene();
@@ -51,6 +55,13 @@ export function createStage(container) {
   const updates = new Set();
   const timer = new Timer();
 
+  let needsRender = true;
+  /** Forca um desenho no proximo frame. */
+  const invalidate = () => {
+    needsRender = true;
+  };
+  controls.addEventListener('change', invalidate);
+
   function registerUpdate(fn) {
     updates.add(fn);
     return () => updates.delete(fn);
@@ -62,6 +73,7 @@ export function createStage(container) {
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    invalidate();
   }
 
   // Reenquadra junto com o resize: o logo e muito largo e sairia da tela em
@@ -78,9 +90,16 @@ export function createStage(container) {
     timer.update(timestamp);
     const delta = Math.min(timer.getDelta(), 0.1); // clamp apos aba em background
     const elapsed = timer.getElapsed();
+
     for (const fn of updates) fn(delta, elapsed);
-    controls.update();
-    renderer.render(scene, camera);
+
+    // update() devolve true enquanto a camera ainda se move (inclui o damping)
+    const cameraMoved = controls.update(delta);
+
+    if (needsRender || cameraMoved || updates.size > 0) {
+      renderer.render(scene, camera);
+      needsRender = false;
+    }
   });
 
   /**
@@ -142,6 +161,7 @@ export function createStage(container) {
     renderer,
     controls,
     registerUpdate,
+    invalidate,
     frameObject: (object, options) => {
       framedObject = object;
       return frameObject(object, options);

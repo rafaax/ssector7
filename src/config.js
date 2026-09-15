@@ -25,16 +25,7 @@ export const config = {
     maxDistanceFactor: 2.5,
   },
 
-  // rotacao automatica do logo, em radianos por segundo
-  autoRotate: {
-    speed: 0.22,
-    // amplitude da oscilacao vertical (radianos) e periodo (segundos)
-    tiltAmplitude: 0.07,
-    tiltPeriod: 9,
-    // tempo (s) parado apos o usuario interagir antes de voltar a girar
-    resumeDelay: 1.6,
-  },
-
+  // Animacao de entrada, roda uma vez no load. duration: 0 desliga.
   intro: {
     duration: 1.6,
     fromScale: 0.82,
