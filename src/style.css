@@ -15,12 +15,14 @@
 :root[data-theme='light'] {
   --bg: #f7f7f8;
   --fg: #6b7480;
-  --backdrop: radial-gradient(120% 80% at 50% 38%, #ffffff 0%, #f2f3f5 45%, var(--bg) 100%);
+  /* Fundo chapado, exatamente a cor de fundo do logo_light.png (#f7f7f8).
+     Assim o png do fallback encosta no fundo sem desenhar retangulo - e por
+     isso o tema claro nao usa blend. No tema escuro o gradiente funciona
+     porque o fundo preto puro do png e neutro para o mix-blend-mode screen. */
+  --backdrop: var(--bg);
   --loader-track: #dcdfe4;
   --loader-fill: #2b3038;
-  /* o logo.png atual e branco sobre preto; no tema claro o fallback precisa
-     de uma versao invertida do png para compor bem com multiply */
-  --fallback-blend: multiply;
+  --fallback-blend: normal;
   color-scheme: light;
 }
 

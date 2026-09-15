@@ -57,10 +57,13 @@ export const config = {
    *             na cor do fundo, para a peca ler como massa chapada e so o
    *             contorno saltar, como no logo.png.
    * `background` alimenta a meta theme-color; o fundo visivel vem do CSS.
+   * `fallbackImage` e o png mostrado quando nao ha WebGL ou o modelo falha -
+   * um por tema, porque o traco precisa contrastar com o fundo.
    */
   themes: {
     dark: {
       background: 0x07090c,
+      fallbackImage: 'logo.png',
       // Sem environment map: o RoomEnvironment e claro demais e lava a parede
       // escura (mesmo a 8% de intensidade ela subia de 1 para 29/255).
       // Aqui o visual e grafico e chapado, quem ilumina sao so as luzes.
@@ -88,6 +91,7 @@ export const config = {
     // Fase 2: fundo branco, letra branca, contorno preto.
     light: {
       background: 0xf7f7f8,
+      fallbackImage: 'logo_light.png',
       // No tema claro a massa e branca: o environment ajuda a modelar a forma.
       environment: true,
       toneMapping: 'aces',

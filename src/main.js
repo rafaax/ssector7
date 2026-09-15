@@ -89,8 +89,10 @@ function showFallback(message) {
   const fallback = document.createElement('div');
   fallback.className = 'fallback';
 
+  // um png por tema: traco branco sobre preto, ou preto sobre branco
+  const { fallbackImage } = config.themes[resolveThemeName()];
   const image = document.createElement('img');
-  image.src = `${import.meta.env.BASE_URL}logo.png`;
+  image.src = `${import.meta.env.BASE_URL}${fallbackImage}`;
   image.alt = 'SSECTOR7';
 
   const note = document.createElement('p');
