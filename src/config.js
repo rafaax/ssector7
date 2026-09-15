@@ -1,10 +1,18 @@
 // Todos os numeros ajustaveis da cena ficam aqui.
 
 export const config = {
-  // Tema ativo. 'dark' reproduz o logo.png: fundo preto, letra preta (o miolo
-  // da letra nao e geometria - e o fundo aparecendo) e contorno branco.
-  // 'light' e o inverso, para a fase 2. Trocar aqui muda a cena e o CSS junto.
-  theme: 'dark',
+  // 'auto' decide pelo relogio local do visitante; 'dark' ou 'light' fixam um.
+  //   dark  - reproduz o logo.png: fundo preto, letra preta (o miolo da letra
+  //           nao e geometria, e o fundo aparecendo) e contorno branco.
+  //   light - o inverso: fundo branco, letra branca, contorno preto.
+  theme: 'auto',
+
+  // Faixa do tema claro, em horas locais (aceita fracao: 6.5 = 06:30).
+  // Fora dela vale o tema escuro.
+  autoTheme: {
+    lightFrom: 6,
+    lightTo: 18,
+  },
 
   toneMappingExposure: 1.0,
 
@@ -103,5 +111,3 @@ export const config = {
   },
 };
 
-/** Preset do tema ativo, ja resolvido. */
-export const theme = config.themes[config.theme];

@@ -1,28 +1,17 @@
 import { DirectionalLight, AmbientLight, PMREMGenerator } from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { config, theme } from './config.js';
+import { config } from './config.js';
 
 /**
- * Environment map gerado em runtime (RoomEnvironment) - da reflexo ao material
- * cromado sem baixar nenhum HDRI. Mais as luzes que marcam as bordas extrudadas.
+ * As luzes da cena. Entram uma vez; o que muda entre temas sao os materiais,
+ * o environment e o tonemapping.
+ *
+ * scene.background fica nulo de proposito: o canvas e transparente e o fundo
+ * e o gradiente CSS, que acompanha o tema.
  *
  * @returns {() => void} dispose
  */
-export function setupEnvironment(renderer, scene) {
-  // scene.background fica nulo de proposito: o canvas e transparente e o fundo
-  // e o gradiente CSS, mais suave do que uma cor chapada atras do cromado.
-  // O environment map so entra nos temas que pedem (ver config.themes).
-  let envMap = null;
-  if (theme.environment) {
-    const pmrem = new PMREMGenerator(renderer);
-    const room = new RoomEnvironment();
-    envMap = pmrem.fromScene(room, 0.04).texture;
-    scene.environment = envMap;
-
-    room.dispose();
-    pmrem.dispose();
-  }
-
+export function setupLights(scene) {
   const { key, rim, fill } = config.lights;
 
   const keyLight = new DirectionalLight(key.color, key.intensity);
@@ -39,7 +28,30 @@ export function setupEnvironment(renderer, scene) {
     scene.remove(keyLight, rimLight, fillLight);
     keyLight.dispose();
     rimLight.dispose();
-    envMap?.dispose();
-    scene.environment = null;
   };
+}
+
+let currentEnvMap = null;
+
+/**
+ * Liga ou desliga o environment map conforme o tema pede, gerando-o em runtime
+ * (RoomEnvironment) - sem baixar nenhum HDRI. Chamavel a cada troca de tema:
+ * descarta o anterior antes de criar o novo.
+ */
+export function applyEnvironment(renderer, scene, preset) {
+  if (currentEnvMap) {
+    currentEnvMap.dispose();
+    currentEnvMap = null;
+  }
+  scene.environment = null;
+
+  if (!preset.environment) return;
+
+  const pmrem = new PMREMGenerator(renderer);
+  const room = new RoomEnvironment();
+  currentEnvMap = pmrem.fromScene(room, 0.04).texture;
+  scene.environment = currentEnvMap;
+
+  room.dispose();
+  pmrem.dispose();
 }

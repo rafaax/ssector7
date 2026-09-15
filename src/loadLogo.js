@@ -1,7 +1,6 @@
 import { Box3, Group, Vector3 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
-import { theme } from './config.js';
 
 /**
  * Carrega o GLB otimizado (EXT_meshopt_compression + KHR_mesh_quantization),
@@ -9,6 +8,9 @@ import { theme } from './config.js';
  *
  * O recentro importa: a malha exportada esta apoiada em Y=0, entao girar o
  * objeto cru faria ele orbitar fora do proprio eixo.
+ *
+ * Os materiais nao sao aplicados aqui: quem manda neles e o tema, via
+ * applyMaterials(), que roda de novo a cada troca.
  *
  * @param {string} url
  * @param {(progress: number) => void} [onProgress] 0..1
@@ -25,7 +27,6 @@ export async function loadLogo(url, onProgress) {
   });
 
   const model = gltf.scene;
-  applyMaterials(model);
 
   const box = new Box3().setFromObject(model);
   const center = box.getCenter(new Vector3());
@@ -49,23 +50,23 @@ const ROLE_BY_MATERIAL_NAME = {
   steel_edge: 'body',
 };
 
-/** Aplica o preset do tema ativo por cima do que veio do exportador. */
-function applyMaterials(root) {
+/** Aplica um preset de tema por cima dos materiais que vieram do exportador. */
+export function applyMaterials(root, preset) {
   root.traverse((object) => {
     if (!object.isMesh) return;
 
     const materials = Array.isArray(object.material) ? object.material : [object.material];
     for (const material of materials) {
       const role = ROLE_BY_MATERIAL_NAME[material.name];
-      const preset = role && theme[role];
-      if (!preset) continue;
+      const values = role && preset[role];
+      if (!values) continue;
 
-      material.color.setHex(preset.color);
-      material.emissive.setHex(preset.emissive);
-      material.emissiveIntensity = preset.emissiveIntensity;
-      material.metalness = preset.metalness;
-      material.roughness = preset.roughness;
-      material.envMapIntensity = preset.envMapIntensity;
+      material.color.setHex(values.color);
+      material.emissive.setHex(values.emissive);
+      material.emissiveIntensity = values.emissiveIntensity;
+      material.metalness = values.metalness;
+      material.roughness = values.roughness;
+      material.envMapIntensity = values.envMapIntensity;
       material.needsUpdate = true;
     }
   });

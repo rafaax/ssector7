@@ -1,6 +1,4 @@
 import {
-  ACESFilmicToneMapping,
-  NoToneMapping,
   Box3,
   MathUtils,
   PerspectiveCamera,
@@ -11,7 +9,7 @@ import {
   WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { config, theme } from './config.js';
+import { config } from './config.js';
 
 /**
  * Renderer + camera + controls + render loop.
@@ -33,9 +31,7 @@ export function createStage(container) {
     powerPreference: 'high-performance',
   });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  // 'none' mantem as cores literais (branco emissivo sai 255, como no png);
-  // 'aces' da o rolloff filmico, melhor quando a cena tem brilho e reflexo.
-  renderer.toneMapping = theme.toneMapping === 'aces' ? ACESFilmicToneMapping : NoToneMapping;
+  // o tonemapping vem do tema (src/theme.js), que o troca junto com as cores
   renderer.toneMappingExposure = config.toneMappingExposure;
   renderer.outputColorSpace = SRGBColorSpace;
   container.appendChild(renderer.domElement);
