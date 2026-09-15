@@ -3,9 +3,8 @@ import { createStage } from './renderer.js';
 import { setupEnvironment } from './environment.js';
 import { loadLogo } from './loadLogo.js';
 import { config } from './config.js';
+import modelUrl from './assets/logo.glb?url';
 import './style.css';
-
-const MODEL_URL = `${import.meta.env.BASE_URL}models/logo.glb`;
 
 const container = document.getElementById('stage');
 const loaderEl = document.getElementById('loader');
@@ -26,7 +25,7 @@ async function main() {
 
   let logo;
   try {
-    logo = await loadLogo(MODEL_URL, (progress) => {
+    logo = await loadLogo(modelUrl, (progress) => {
       loaderFill.style.width = `${Math.round(progress * 100)}%`;
     });
   } catch (error) {
