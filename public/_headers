@@ -1,0 +1,12 @@
+# Cache no Cloudflare Pages.
+# /assets/* leva hash no nome a cada build, entao pode ser imutavel.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# O modelo tem nome fixo: um dia de cache, para uma troca de logo
+# aparecer rapido sem refazer o download a cada visita.
+/models/*
+  Cache-Control: public, max-age=86400
+
+/logo.png
+  Cache-Control: public, max-age=86400

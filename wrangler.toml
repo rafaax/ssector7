@@ -1,0 +1,6 @@
+# Deploy do site estatico no Cloudflare Pages.
+#   npx wrangler login      (uma vez, abre o browser)
+#   npm run deploy          (build + upload do dist/)
+name = "ssector7"
+compatibility_date = "2026-09-14"
+pages_build_output_dir = "dist"
