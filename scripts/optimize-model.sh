@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Comprime o GLB de origem para src/assets/logo.glb, de onde o Vite o publica
 # com hash no nome (cache imutavel).
-# Uso: scripts/optimize-model.sh [arquivo.glb]  (padrao: source/logo2.glb)
+# Uso: scripts/optimize-model.sh [arquivo.glb]  (padrao: source/logo4.glb)
 #   prune  - remove as UVs nao usadas (o modelo nao tem nenhuma textura)
 #   weld   - funde vertices duplicados
 #   join   - junta as primitives em 1 por material (2 draw calls)
@@ -11,7 +11,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-SRC="${1:-source/logo2.glb}"
+SRC="${1:-source/logo4.glb}"
 OUT=src/assets/logo.glb
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
