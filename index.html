@@ -6,6 +6,80 @@
     <title>SSECTOR7</title>
     <meta name="description" content="contracultura digital" />
     <meta name="theme-color" content="#07090c" />
+    <script>
+      (function () {
+        var now = new Date();
+        var hour = now.getHours() + now.getMinutes() / 60;
+        document.documentElement.dataset.theme = hour >= 6 && hour < 18 ? 'light' : 'dark';
+      })();
+    </script>
+    <style>
+      :root {
+        --bg: #07090c;
+        --fg: #8b99a6;
+        --loader-fill: #cfd8e0;
+      }
+      :root[data-theme='light'] {
+        --bg: #f7f7f8;
+        --fg: #6b7480;
+        --loader-fill: #2b3038;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+      html {
+        background: var(--bg);
+      }
+      body {
+        color: var(--fg);
+        font: 400 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+        letter-spacing: 0.18em;
+        text-transform: lowercase;
+      }
+      .stage {
+        opacity: 0;
+      }
+      .loader {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-content: center;
+        justify-items: center;
+        gap: 22px;
+      }
+      .loader__globe {
+        width: min(220px, 48vw);
+        height: auto;
+        color: var(--loader-fill);
+      }
+      .loader__label {
+        margin: 0;
+        font-size: 10px;
+      }
+      .ui {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+      }
+      .nav-mirror {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        border: 0;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
+      .room {
+        position: absolute;
+        opacity: 0;
+        visibility: hidden;
+      }
+    </style>
     <link rel="icon" href="/favicons/files/favicon.ico" sizes="16x16" />
     <link
       id="favicon-png"
@@ -42,7 +116,7 @@
           />
         </g>
       </svg>
-      <p id="loader-label" class="loader__label">carregando</p>
+      <p id="loader-label" class="loader__label"></p>
     </div>
     
     <div class="ui">
