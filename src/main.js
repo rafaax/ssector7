@@ -5,18 +5,23 @@ import { createWorld } from './world.js';
 import { createPicker } from './picking.js';
 import { createNavigator } from './navigation.js';
 import { createOverlay } from './overlay.js';
+import { createLoaderGlobe } from './loader.js';
 import { config } from './config.js';
 import { applyThemeToDocument, resolveThemeName, startTheme } from './theme.js';
 import './style.css';
 
 const container = document.getElementById('stage');
 const loaderEl = document.getElementById('loader');
-const loaderFill = document.getElementById('loader-fill');
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Antes de qualquer coisa, para a tela de carregamento ja nascer na cor certa.
 applyThemeToDocument(resolveThemeName());
+
+// O globo comeca a girar antes de qualquer coisa: e ele quem ocupa a espera
+// pelo modelo, que e o download pesado da pagina.
+const loader = createLoaderGlobe({ reducedMotion: prefersReducedMotion });
+
 main();
 
 async function main() {
@@ -32,9 +37,7 @@ async function main() {
   try {
     world = await createWorld({
       stage,
-      onProgress: (progress) => {
-        loaderFill.style.width = `${Math.round(progress * 100)}%`;
-      },
+      onProgress: (progress) => loader.setProgress(progress),
     });
   } catch (error) {
     console.error('[ssector7] falha ao carregar o modelo', error);
@@ -97,8 +100,8 @@ async function main() {
     window.__ssector7 = { stage, world, config, theme: themeController, navigator, picker };
   }
 
-  loaderFill.style.width = '100%';
-  loaderEl.classList.add('is-hidden');
+  loader.setProgress(1);
+  hideLoader();
   container.classList.add('is-ready');
 }
 
@@ -131,7 +134,7 @@ function registerIntro(stage, target) {
 
 /** Sem WebGL ou sem o modelo: mostra o logo 2D e diz o porque. */
 function showFallback(message) {
-  loaderEl.classList.add('is-hidden');
+  hideLoader();
 
   // Sem cena 3D nao ha para onde navegar: a camada de overlay some junto, senao
   // sobrariam botoes invisiveis que o Tab alcanca e que nao fazem nada.
@@ -153,6 +156,19 @@ function showFallback(message) {
   fallback.append(image, note);
   document.body.appendChild(fallback);
   console.warn(`[ssector7] ${message}`);
+}
+
+/** Some com a tela de carregamento e para o giro - nada anima escondido. */
+function hideLoader() {
+  loaderEl.classList.add('is-hidden');
+
+  // Para o giro quando a tela terminar de sumir. O timer e a rede de seguranca:
+  // transitionend nao dispara se a transicao estiver desligada ou se a aba
+  // estiver em segundo plano, e um rAF girando para sempre sob a cena e um
+  // vazamento silencioso. stop() e idempotente.
+  const stop = () => loader.stop();
+  loaderEl.addEventListener('transitionend', stop, { once: true });
+  setTimeout(stop, 1200);
 }
 
 function easeOutCubic(t) {

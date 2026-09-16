@@ -78,7 +78,7 @@ body {
   display: grid;
   place-content: center;
   justify-items: center;
-  gap: 14px;
+  gap: 22px;
   background: var(--backdrop);
   transition: opacity 600ms ease;
 }
@@ -88,19 +88,18 @@ body {
   pointer-events: none;
 }
 
-.loader__bar {
-  width: min(180px, 46vw);
-  height: 1px;
-  background: var(--loader-track);
-  overflow: hidden;
+/* O globo herda a cor do tema por currentColor. As espessuras vivem em
+   unidades do viewBox, e nao em px via non-scaling-stroke: com esse efeito
+   ligado o navegador passa a medir o tracejado em espaco de tela e ignora o
+   pathLength, o que deixava o anel de progresso sempre cheio. */
+.loader__globe {
+  width: min(220px, 48vw);
+  height: auto;
+  color: var(--loader-fill);
 }
 
-.loader__fill {
-  display: block;
-  width: 0%;
-  height: 100%;
-  background: var(--loader-fill);
-  transition: width 200ms linear;
+#loader-progress {
+  transition: stroke-dashoffset 220ms linear;
 }
 
 .loader__label {

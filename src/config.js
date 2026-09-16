@@ -98,6 +98,19 @@ export const config = {
   },
 
   /**
+   * A tela de carregamento: um globo de arames girando (src/loader.js).
+   * `samples` e quantos pontos desenham cada circulo - abaixo de ~100 a
+   * silhueta facetiza; `fps` limita o redesenho, porque durante o carregamento
+   * o processador e de quem esta baixando o modelo, nao da animacao.
+   */
+  loader: {
+    density: 'regular', // sparse | regular | dense
+    period: 10, // segundos por volta completa
+    samples: 140,
+    fps: 30,
+  },
+
+  /**
    * Poeira no corredor entre a home e a sala. `zNear`/`zFar` cobrem a
    * trajetoria inteira (o logo esta em z=0 e a sala em z=-5); `fade` e o tempo
    * de acender e apagar.
