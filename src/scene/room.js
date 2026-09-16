@@ -89,8 +89,14 @@ export function createRoom() {
 
       const center = toScreen(0, 0);
       const right = toScreen(halfX, 0);
+      const top = toScreen(0, halfY);
 
-      return { x: center.x, y: center.y, halfWidth: Math.abs(right.x - center.x) };
+      return {
+        x: center.x,
+        y: center.y,
+        halfWidth: Math.abs(right.x - center.x),
+        halfHeight: Math.abs(top.y - center.y),
+      };
     },
 
     dispose() {

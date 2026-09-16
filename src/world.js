@@ -92,7 +92,13 @@ export async function createWorld({ stage, onProgress } = {}) {
       id: 'about',
       focus: room.focus,
       direction: { x: 0, y: 0, z: 1 },
-      fitOffset: config.room.fitOffset,
+      // getter: a folga e lida na hora de enquadrar, ja com o aspect corrente
+      get fitOffset() {
+        const { narrow, wide } = config.room.fitOffset;
+        const { min, max } = config.room.aspect;
+        const t = Math.min(Math.max((stage.camera.aspect - min) / (max - min), 0), 1);
+        return narrow + (wide - narrow) * t;
+      },
       ambience: 0.14,
       // A sala e chapada e de frente: orbitar por tras dela nao mostraria nada.
       // Um pouco de folga mantem a cena viva sem quebrar a leitura.

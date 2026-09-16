@@ -133,6 +133,13 @@ export function createStage(container) {
     object,
     { direction, preserveOrbit = false, fitOffset = config.camera.fitOffset } = {},
   ) {
+    // Box3.setFromObject atualiza a matriz do objeto e dos filhos, mas nao a
+    // dos pais. Num link direto para uma estacao o enquadramento acontece antes
+    // do primeiro render, quando a cena inteira ainda esta com matriz
+    // identidade - e a sala, que so existe deslocada em z pelo grupo pai, seria
+    // medida na origem.
+    object.updateWorldMatrix(true, true);
+
     const box = new Box3().setFromObject(object);
     const size = box.getSize(new Vector3());
     const center = box.getCenter(new Vector3());

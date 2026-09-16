@@ -72,9 +72,14 @@ export const config = {
     aspect: { min: 0.62, max: 1.6 },
     corner: 0.16, // comprimento de cada bracete de canto
     // o rotulo de volta, dentro da moldura, rente a borda de baixo
-    back: { label: 'voltar', size: 0.026, inset: 0.075 },
-    // mais folga que o logo: os bracetes precisam respirar longe da borda
-    fitOffset: 1.32,
+    back: { label: 'back', size: 0.026, inset: 0.075 },
+    /**
+     * Folga ao redor da moldura, interpolada pela proporcao da janela.
+     * No desktop sobra tela, entao os bracetes respiram longe da borda. Num
+     * celular em pe cada pixel de altura conta: a moldura quase encosta nas
+     * bordas, e e isso que faz um paragrafo a mais caber sem encolher a letra.
+     */
+    fitOffset: { narrow: 1.06, wide: 1.32 },
   },
 
   /**

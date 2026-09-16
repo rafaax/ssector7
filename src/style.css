@@ -171,11 +171,13 @@ body {
   position: absolute;
   transform: translate(-50%, -50%);
   container-type: inline-size;
+  /* multiplicador que o overlay ajusta para o texto caber na moldura */
+  --fit: 1;
   /* so as laterais: padding vertical em % resolve contra a LARGURA do bloco,
      entao um valor unico deslocaria o texto de um jeito no desktop e de outro
      no celular. O equilibrio vertical vem do proprio 3D - o bloco e centrado
      na moldura, e o "voltar" ancora a base. */
-  padding: 0 5%;
+  padding: 0 7%;
   text-align: center;
   opacity: 0;
   visibility: hidden;
@@ -190,17 +192,21 @@ body {
 }
 
 .room__title {
-  margin: 0 0 3.5cqw;
-  font-size: clamp(12px, 4.2cqw, 26px);
+  margin: 0 0 calc(3.5cqw * var(--fit));
+  /* o max() e o piso de legibilidade: por mais que --fit encolha para o texto
+     caber, a letra nao desce de um tamanho que ainda se le */
+  font-size: max(12px, calc(clamp(12px, 4.2cqw, 26px) * var(--fit)));
   font-weight: 400;
   letter-spacing: 0.34em;
   color: var(--loader-fill);
 }
 
 .room__text {
-  margin: 0 auto 2.6cqw;
-  max-width: 52ch;
-  font-size: clamp(11px, 3.2cqw, 17px);
+  margin: 0 auto calc(2.6cqw * var(--fit));
+  /* medida larga de proposito: com linha curta um texto de dois paragrafos
+     vira uma coluna alta e ragged no meio do quadro */
+  max-width: 68ch;
+  font-size: max(11px, calc(clamp(11px, 3.2cqw, 17px) * var(--fit)));
   line-height: 1.95;
   letter-spacing: 0.1em;
   text-transform: none;
