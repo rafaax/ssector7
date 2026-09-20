@@ -42,18 +42,18 @@ export const config = {
   },
 
   /**
-   * O botao 3D que leva ao about. Tudo em unidades de mundo, com o logo
-   * centrado na origem medindo 1.87 de largura por 0.64 de altura.
-   * `depth` e a espessura do logo (0.0236), para o botao parecer recortado da
-   * mesma chapa; `tracking` acompanha o letter-spacing largo do CSS.
+   * Padroes dos rotulos 3D clicaveis (hoje so o "back" dentro da sala - o
+   * "about us" da home virou o header em HTML, veja src/style.css). Tudo em
+   * unidades de mundo, com o logo centrado na origem medindo 1.87 de largura
+   * por 0.64 de altura. `depth` e a espessura do logo (0.0236), para o rotulo
+   * parecer recortado da mesma chapa; `tracking` acompanha o letter-spacing
+   * largo do CSS.
    */
   button: {
-    label: 'about us',
     size: 0.072,
     depth: 0.0236,
     tracking: 0.24,
-    position: { x: 0, y: -0.5, z: 0 },
-    // quanto o botao cresce no hover, e em quanto tempo
+    // quanto o rotulo cresce no hover, e em quanto tempo
     hover: { scale: 1.08, duration: 0.18 },
   },
 

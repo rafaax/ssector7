@@ -35,6 +35,8 @@ export function createOverlay({ stage, world, picker, navigate }) {
   const MIN_FIT = 0.55;
 
   const about = document.getElementById('room-about');
+  const navToggle = document.getElementById('nav-toggle');
+  const navToggleTexts = navToggle ? [...navToggle.querySelectorAll('.nav-link__text')] : [];
   const buttons = [...document.querySelectorAll('[data-station]')];
 
   // cada botao do DOM aponta para o rotulo 3D que ele representa
@@ -97,11 +99,20 @@ export function createOverlay({ stage, world, picker, navigate }) {
     about.style.setProperty('--fit', scale < 1 ? String(Math.max(scale, MIN_FIT)) : '1');
   }
 
+  /** O header sempre leva para o outro lugar: "about us" na home, "home" na sala. */
+  function setNavToggle(id) {
+    if (!navToggle) return;
+    const toAbout = id !== 'about';
+    navToggle.dataset.station = toAbout ? 'about' : 'home';
+    for (const text of navToggleTexts) text.textContent = toAbout ? 'about us' : 'home';
+  }
+
   stage.controls.addEventListener('change', place);
   window.addEventListener('resize', fit);
 
   return {
     enter(id) {
+      setNavToggle(id);
       if (id !== 'about') return;
       about.classList.add('is-active');
       about.removeAttribute('inert');

@@ -120,7 +120,16 @@
     </div>
     
     <div class="ui">
-      <button class="nav-mirror" type="button" data-station="about">about us</button>
+      <header class="site-header">
+        <button class="nav-link" type="button" id="nav-toggle" data-station="about">
+          <span class="nav-link__viewport">
+            <span class="nav-link__rows">
+              <span class="nav-link__text">about us</span>
+              <span class="nav-link__text" aria-hidden="true">about us</span>
+            </span>
+          </span>
+        </button>
+      </header>
 
       <section id="room-about" class="room" aria-labelledby="room-title" inert>
         <h1 id="room-title" class="room__title">!</h1>

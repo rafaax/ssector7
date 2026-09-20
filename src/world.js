@@ -32,10 +32,10 @@ export async function createWorld({ stage, onProgress } = {}) {
   const disposers = [];
   const interactives = [];
 
-  // --- home: o logo e o rotulo que leva ao about ---------------------------
+  // --- home: o logo -----------------------------------------------------
 
-  // A home e um grupo, nao o logo direto: o botao entra aqui tambem, e o
-  // enquadramento da estacao precisa considerar os dois juntos.
+  // A home e um grupo, nao o logo direto: mantem o mesmo formato de estacao
+  // das demais, com o enquadramento resolvido a partir do grupo.
   const home = new Group();
   home.name = 'home';
   root.add(home);
@@ -44,9 +44,6 @@ export async function createWorld({ stage, onProgress } = {}) {
   home.add(logo);
   themed.push((preset) => applyMaterials(logo, preset));
   disposers.push(() => disposeTree(logo));
-
-  const aboutLabel = label(config.button.label, config.button.position, 'about');
-  home.add(aboutLabel.object);
 
   const particles = createParticles({ stage });
   root.add(particles.object);
