@@ -64,6 +64,15 @@
         inset: 0;
         pointer-events: none;
       }
+      /* Sem isso o header pisca sem estilo (as duas versoes do logo, claro
+         e escuro, e o "about us" soltos) no instante entre o primeiro paint
+         e o css externo carregar - src/style.css so chega via import do
+         main.js, depois do parse do body. A regra que reexibe o header
+         quando a cena fica pronta mora la; aqui so a base escondida. */
+      .site-header {
+        opacity: 0;
+        visibility: hidden;
+      }
       .nav-mirror {
         position: absolute;
         width: 1px;
