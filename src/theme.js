@@ -3,6 +3,18 @@ import { config } from './config.js';
 import { applyEnvironment } from './environment.js';
 
 /**
+ * `?theme=dark` ou `?theme=light` na URL veste esse tema e trava a virada
+ * automatica - util pra link de preview e pra tirar print sem esperar o
+ * relogio. `?theme=auto` (ou nenhum parametro) devolve o comportamento
+ * normal. So le a URL, nao escreve nela: navegar dentro do site preserva a
+ * query string porque o roteamento vive no hash (src/navigation.js).
+ */
+export function themeOverrideFromURL() {
+  const forced = new URLSearchParams(location.search).get('theme');
+  return forced in config.themes ? forced : null;
+}
+
+/**
  * Qual tema vale num dado instante.
  *
  * Com `config.theme: 'auto'` quem decide e o relogio local do visitante - nao
@@ -10,6 +22,9 @@ import { applyEnvironment } from './environment.js';
  * Sem geolocalizacao e sem pedir permissao nenhuma.
  */
 export function resolveThemeName(now = new Date()) {
+  const forced = themeOverrideFromURL();
+  if (forced) return forced;
+
   if (config.theme !== 'auto') return config.theme;
 
   const [from, to] = boundaries();
@@ -86,7 +101,10 @@ export function startTheme({ stage, world }) {
 
   function schedule() {
     clearTimeout(timer);
-    if (config.theme !== 'auto') return;
+    // forcado pela URL ou tema fixo no config: nao ha fronteira de horario
+    // para agendar, o tema so muda se um dos dois mudar - e isso so acontece
+    // navegando para outra URL, que recarrega a pagina.
+    if (config.theme !== 'auto' || themeOverrideFromURL()) return;
     timer = setTimeout(tick, msUntilNextChange());
   }
 

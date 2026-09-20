@@ -8,9 +8,16 @@
     <meta name="theme-color" content="#07090c" />
     <script>
       (function () {
-        var now = new Date();
-        var hour = now.getHours() + now.getMinutes() / 60;
-        document.documentElement.dataset.theme = hour >= 6 && hour < 18 ? 'light' : 'dark';
+        var forced = new URLSearchParams(location.search).get('theme');
+        var theme;
+        if (forced === 'dark' || forced === 'light') {
+          theme = forced;
+        } else {
+          var now = new Date();
+          var hour = now.getHours() + now.getMinutes() / 60;
+          theme = hour >= 6 && hour < 18 ? 'light' : 'dark';
+        }
+        document.documentElement.dataset.theme = theme;
       })();
     </script>
     <style>
