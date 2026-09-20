@@ -6,24 +6,6 @@ import { createParticles } from './scene/particles.js';
 import { config } from './config.js';
 import modelUrl from './assets/logo.glb?url';
 
-/**
- * Monta a cena e e a unica dona dela.
- *
- * Tudo que existe em 3D entra aqui, e cada peca se registra em duas listas:
- *   - `themed`       - recebe o preset a cada troca de tema
- *   - `interactives` - o que o raycaster testa (e so isso: o logo tem 89 mil
- *                      triangulos e nunca deve entrar nessa lista)
- *
- * As estacoes sao os lugares navegaveis, e sao dado, nao codigo: acrescentar
- * uma secao no futuro e acrescentar uma estacao aqui e um rotulo que aponte
- * para ela - a navegacao nao muda. Cada uma pode trazer
- *   `direction` - de onde a camera olha
- *   `controls`  - limites de orbita proprios, mesclados sobre config.controls
- *   `prepare`   - roda quando o voo para la comeca
- *   `dismiss`   - roda quando outro lugar e alcancado
- *
- * @returns {Promise<object>}
- */
 export async function createWorld({ stage, onProgress } = {}) {
   const root = new Group();
   root.name = 'world';
@@ -32,10 +14,6 @@ export async function createWorld({ stage, onProgress } = {}) {
   const disposers = [];
   const interactives = [];
 
-  // --- home: o logo -----------------------------------------------------
-
-  // A home e um grupo, nao o logo direto: mantem o mesmo formato de estacao
-  // das demais, com o enquadramento resolvido a partir do grupo.
   const home = new Group();
   home.name = 'home';
   root.add(home);
@@ -49,8 +27,6 @@ export async function createWorld({ stage, onProgress } = {}) {
   root.add(particles.object);
   themed.push((preset) => particles.applyTheme(preset));
   disposers.push(() => particles.dispose());
-
-  // --- about: a sala atras do logo ----------------------------------------
 
   const room = createRoom();
   room.object.visible = false;
@@ -73,13 +49,10 @@ export async function createWorld({ stage, onProgress } = {}) {
       id: 'home',
       focus: home,
       direction: config.camera.direction,
-      // a home e o vazio: nenhuma poeira em repouso
       ambience: 0,
       prepare: () => {
         home.visible = true;
       },
-      // Fora da home o logo esta atras da camera: esconder economiza 89 mil
-      // triangulos por frame enquanto o visitante le o texto.
       dismiss: () => {
         home.visible = false;
       },
@@ -89,7 +62,6 @@ export async function createWorld({ stage, onProgress } = {}) {
       id: 'about',
       focus: room.focus,
       direction: { x: 0, y: 0, z: 1 },
-      // getter: a folga e lida na hora de enquadrar, ja com o aspect corrente
       get fitOffset() {
         const { narrow, wide } = config.room.fitOffset;
         const { min, max } = config.room.aspect;
@@ -97,8 +69,6 @@ export async function createWorld({ stage, onProgress } = {}) {
         return narrow + (wide - narrow) * t;
       },
       ambience: 0.14,
-      // A sala e chapada e de frente: orbitar por tras dela nao mostraria nada.
-      // Um pouco de folga mantem a cena viva sem quebrar a leitura.
       controls: {
         minPolarAngle: Math.PI / 2 - 0.3,
         maxPolarAngle: Math.PI / 2 + 0.3,
@@ -125,7 +95,6 @@ export async function createWorld({ stage, onProgress } = {}) {
     stations,
     interactives,
 
-    /** Reaplica o tema em todas as pecas registradas. */
     applyTheme(preset) {
       for (const apply of themed) apply(preset);
     },
@@ -135,7 +104,6 @@ export async function createWorld({ stage, onProgress } = {}) {
     },
   };
 
-  /** Rotulo 3D clicavel que leva a uma estacao. */
   function label(text, position, target, size = config.button.size) {
     const item = createText3D(text, {
       size,
@@ -155,7 +123,6 @@ export async function createWorld({ stage, onProgress } = {}) {
   }
 }
 
-/** Libera geometrias e materiais de uma subarvore. */
 export function disposeTree(object) {
   object.traverse((node) => {
     node.geometry?.dispose();

@@ -9,23 +9,6 @@ import {
 import { config } from '../config.js';
 import { createTween } from '../tween.js';
 
-/**
- * O campo de pontos que da referencia de movimento ao voo.
- *
- * Sem ele a travessia lia como um fade: nada no quadro se desloca em relacao a
- * nada. Com paralaxe, o cerebro entende que a camera andou.
- *
- * Duas regras:
- *
- * 1. Na home a intensidade e zero - a pagina inicial continua exatamente como
- *    sempre foi, o logo sozinho no vazio. Os pontos so existem em movimento e
- *    numa presenca minima dentro da sala, para o lugar nao parecer morto.
- *
- * 2. O update so fica registrado enquanto a intensidade esta mudando. O loop do
- *    renderer desenha sempre que ha algum update ativo, entao um updater
- *    permanente aqui custaria um frame por segundo pelo resto da sessao - o
- *    oposto do que a cena inteira foi construida para fazer.
- */
 export function createParticles({ stage }) {
   const { count, size, spread, fade } = config.particles;
 
@@ -53,20 +36,14 @@ export function createParticles({ stage }) {
     sizeAttenuation: true,
     transparent: true,
     opacity: 0,
-    // Sem mascara o PointsMaterial desenha quadrados, e com sizeAttenuation os
-    // pontos que passam perto da camera viram blocos enormes no meio da tela.
-    // O degrade radial transforma esses em bokeh, que e o que a passagem rapida
-    // deveria parecer.
     map: sprite,
-    // sem depthWrite os pontos nao recortam o que vem depois deles; sao poeira,
-    // nao geometria
     depthWrite: false,
   });
 
   const object = new Points(geometry, material);
   object.name = 'particles';
 
-  let peak = 0.5; // vem do tema
+  let peak = 0.5;
 
   const intensity = createTween({
     stage,
@@ -88,7 +65,6 @@ export function createParticles({ stage }) {
       paint();
     },
 
-    /** 0 = invisivel, 1 = cheio. A navegacao acende no voo e baixa na chegada. */
     setIntensity(next) {
       intensity.to(Math.min(Math.max(next, 0), 1));
     },
@@ -101,14 +77,8 @@ export function createParticles({ stage }) {
     },
   };
 
-  /**
-   * Abre um vazio em volta do texto do about: um ponto atras da moldura, no
-   * eixo do olhar, vira sujeira em cima da leitura.
-   */
   function insideRoom(x, y, z) {
     const { distance, height, aspect } = config.room;
-    // a moldura muda de proporcao com a janela; o vazio e cavado pela maior
-    // largura possivel, para nao depender do tamanho da tela de quem abre
     return (
       Math.abs(x) < height * aspect.max * 0.55 &&
       Math.abs(y) < height * 0.55 &&
@@ -118,7 +88,6 @@ export function createParticles({ stage }) {
   }
 }
 
-/** Disco com borda suave, desenhado em canvas - nenhum arquivo a baixar. */
 function dotTexture(resolution = 64) {
   const canvas = document.createElement('canvas');
   canvas.width = resolution;

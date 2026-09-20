@@ -2,15 +2,6 @@ import { DirectionalLight, AmbientLight, PMREMGenerator } from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { config } from './config.js';
 
-/**
- * As luzes da cena. Entram uma vez; o que muda entre temas sao os materiais,
- * o environment e o tonemapping.
- *
- * scene.background fica nulo de proposito: o canvas e transparente e o fundo
- * e o gradiente CSS, que acompanha o tema.
- *
- * @returns {() => void} dispose
- */
 export function setupLights(scene) {
   const { key, rim, fill } = config.lights;
 
@@ -33,11 +24,6 @@ export function setupLights(scene) {
 
 let currentEnvMap = null;
 
-/**
- * Liga ou desliga o environment map conforme o tema pede, gerando-o em runtime
- * (RoomEnvironment) - sem baixar nenhum HDRI. Chamavel a cada troca de tema:
- * descarta o anterior antes de criar o novo.
- */
 export function applyEnvironment(renderer, scene, preset) {
   if (currentEnvMap) {
     currentEnvMap.dispose();

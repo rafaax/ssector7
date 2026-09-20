@@ -1,30 +1,10 @@
 import { config } from './config.js';
 
-/**
- * O globo de arames da tela de carregamento.
- *
- * Porte do desenho feito no Claude Design (globe-scene.jsx): circulos maximos
- * projetados ortograficamente, separados em arcos da frente e do fundo pelo
- * sinal de z. O original roda em React recomputando as paths a cada frame; aqui
- * o que interessa e nao roubar o processador de quem esta baixando 1,4 MB de
- * modelo, entao:
- *
- *   - as bases u/v de cada circulo saem prontas uma vez, no inicio;
- *   - o seno e o cosseno de cada amostra tambem, num Float64Array;
- *   - a rotacao do frame e aplicada as DUAS bases, nao aos 2380 pontos - a
- *     projecao e linear, entao girar a base equivale a girar cada ponto;
- *   - os 17 circulos viram apenas duas paths (uma do fundo, uma da frente),
- *     em vez de 34 elementos no DOM;
- *   - o desenho e limitado a config.loader.fps.
- *
- * O contorno da esfera e o anel de progresso ficam estaticos no index.html, e
- * por isso aparecem no primeiro paint, antes deste modulo existir.
- */
 const TWO_PI = Math.PI * 2;
 const CENTER = 500;
 const RADIUS = 340;
-const BREATHE = 0.015; // variacao do raio ao longo da volta
-const WOBBLE = 0.16; // inclinacao do eixo, em radianos
+const BREATHE = 0.015;
+const WOBBLE = 0.16;
 
 export function createLoaderGlobe({ reducedMotion = false } = {}) {
   const backPath = document.getElementById('globe-back');
@@ -81,9 +61,6 @@ export function createLoaderGlobe({ reducedMotion = false } = {}) {
         if (wasFront === null) {
           (isFront ? front : back).push('M', x, ' ', y);
         } else if (isFront !== wasFront) {
-          // A costura entre frente e fundo: o arco que termina vai ate o ponto
-          // atual e o que comeca parte do anterior, senao fica um furo visivel
-          // na silhueta a cada troca de lado.
           (wasFront ? front : back).push('L', x, ' ', y);
           (isFront ? front : back).push('M', lastX, ' ', lastY, 'L', x, ' ', y);
         } else {
@@ -122,9 +99,7 @@ export function createLoaderGlobe({ reducedMotion = false } = {}) {
   }
 
   return {
-    /** @param {number} value 0..1 */
     setProgress(value) {
-      // o anel tem pathLength="100", entao o offset e o quanto ainda falta
       const done = Math.min(Math.max(value, 0), 1) * 100;
       ring?.setAttribute('stroke-dashoffset', String(100 - done));
     },
@@ -136,11 +111,6 @@ export function createLoaderGlobe({ reducedMotion = false } = {}) {
   };
 }
 
-/**
- * As familias de circulos maximos: meridianos mais duas familias inclinadas em
- * sentidos opostos, que e o que da a trama tecida em vez de uma gaiola comum.
- * Cada circulo e guardado pela sua base ortonormal (u, v) no plano dele.
- */
 function buildCircles(density) {
   const [meridians, tilted] = { sparse: [5, 3], regular: [7, 5], dense: [10, 7] }[density] ?? [7, 5];
 
@@ -162,7 +132,6 @@ function buildCircles(density) {
   });
 }
 
-/** Gira em Y e depois em X, com os senos e cossenos ja calculados. */
 function turn(source, cy, sy, cx, sx, out) {
   const x = source[0] * cy + source[2] * sy;
   const y = source[1];

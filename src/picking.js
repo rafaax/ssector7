@@ -2,31 +2,13 @@ import { Raycaster, Vector2 } from 'three';
 import { config } from './config.js';
 import { createTween } from './tween.js';
 
-/**
- * Hover e clique nos objetos interativos da cena.
- *
- * Duas decisoes importantes aqui:
- *
- * 1. O raycaster so testa a lista de interativos, nunca a cena. O logo tem 89
- *    mil triangulos; atravessar ele a cada movimento do mouse seria absurdo.
- *
- * 2. Clique nao e `click`. Os mesmos botoes do mouse giram a cena pelo
- *    OrbitControls, entao um arrasto que termina em cima do botao dispararia a
- *    navegacao. Vale como clique so o que sai e volta praticamente no mesmo
- *    ponto, em pouco tempo, no mesmo objeto.
- *
- * @param {object} params
- * @param {object} params.stage
- * @param {Array} params.interactives  itens com { object, target, setHighlight }
- * @param {(item: object) => void} params.onActivate
- */
 export function createPicker({ stage, interactives, onActivate }) {
   const canvas = stage.renderer.domElement;
   const raycaster = new Raycaster();
   const pointer = new Vector2();
 
-  const CLICK_SLOP = 6; // px
-  const CLICK_TIME = 500; // ms
+  const CLICK_SLOP = 6;
+  const CLICK_TIME = 500;
 
   let hovered = null;
   let focused = null;
@@ -34,8 +16,6 @@ export function createPicker({ stage, interactives, onActivate }) {
   let queued = false;
   let enabled = true;
 
-  // Destaque de 0 (repouso) a 1 (aceso), um tween por item. Cada um so mantem
-  // um update registrado enquanto anima - parado, o loop volta a dormir.
   const { scale: hoverScale, duration } = config.button.hover;
   const highlights = new Map(
     interactives.map((item) => [
@@ -55,7 +35,6 @@ export function createPicker({ stage, interactives, onActivate }) {
     highlights.get(item)?.to(target);
   }
 
-  /** Qual interativo esta sob o ponteiro, ou null. */
   function pick(event) {
     const rect = canvas.getBoundingClientRect();
     pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -63,8 +42,6 @@ export function createPicker({ stage, interactives, onActivate }) {
 
     raycaster.setFromCamera(pointer, stage.camera);
 
-    // So o que esta no lugar onde o visitante esta: o rotulo da home continua
-    // existindo enquanto ele le o about, mas nao deve ser alvo de nada.
     const targets = interactives.filter((item) => isVisible(item.object)).map((item) => item.target);
     const hit = raycaster.intersectObjects(targets, false)[0];
     return hit ? interactives.find((item) => item.target === hit.object) ?? null : null;
@@ -79,7 +56,6 @@ export function createPicker({ stage, interactives, onActivate }) {
   }
 
   function onPointerMove(event) {
-    // Sem hover no toque: o dedo nao paira, e o feedback sai no proprio toque.
     if (event.pointerType === 'touch' || !enabled) return;
     if (queued) return;
 
@@ -122,13 +98,11 @@ export function createPicker({ stage, interactives, onActivate }) {
   canvas.addEventListener('pointercancel', onPointerLeave);
 
   return {
-    /** Acende o item que recebeu foco pelo teclado, pelo botao espelho no DOM. */
     setFocus(item, on) {
       focused = on ? item : null;
       setTarget(item, on || item === hovered ? 1 : 0);
     },
 
-    /** Desliga a interacao durante um voo, para nao acumular navegacoes. */
     setEnabled(value) {
       enabled = value;
       if (!enabled) {
@@ -149,7 +123,6 @@ export function createPicker({ stage, interactives, onActivate }) {
   };
 }
 
-/** Visibilidade efetiva: o objeto e todos os pais acima dele. */
 function isVisible(object) {
   for (let node = object; node; node = node.parent) {
     if (!node.visible) return false;

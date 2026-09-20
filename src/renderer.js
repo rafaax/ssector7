@@ -11,17 +11,6 @@ import {
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { config } from './config.js';
 
-/**
- * Renderer + camera + controls + render loop.
- *
- * O loop expoe `registerUpdate(fn)`: cada fn recebe (delta, elapsed) por frame.
- * E esse o ponto de extensao para animacoes futuras - nada mais precisa mudar
- * aqui para adicionar comportamento novo.
- *
- * A cena e estatica em repouso, entao o loop so desenha quando ha motivo:
- * algum update registrado, a camera se movendo (arrasto, zoom, damping) ou um
- * `invalidate()` explicito. Parado, o custo de GPU por frame e zero.
- */
 export function createStage(container) {
   const scene = new Scene();
 
@@ -31,7 +20,6 @@ export function createStage(container) {
     powerPreference: 'high-performance',
   });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  // o tonemapping vem do tema (src/theme.js), que o troca junto com as cores
   renderer.toneMappingExposure = config.toneMappingExposure;
   renderer.outputColorSpace = SRGBColorSpace;
   container.appendChild(renderer.domElement);
@@ -55,7 +43,6 @@ export function createStage(container) {
   const timer = new Timer();
 
   let needsRender = true;
-  /** Forca um desenho no proximo frame. */
   const invalidate = () => {
     needsRender = true;
   };
@@ -80,15 +67,8 @@ export function createStage(container) {
     invalidate();
   }
 
-  // Reenquadra junto com o resize: o logo e muito largo e sairia da tela em
-  // viewport estreita se so o aspect fosse atualizado. `framedObject` e quem
-  // esta em foco agora - muda com a estacao - e fica nulo durante um voo, para
-  // um resize no meio do trajeto nao teleportar a camera.
   let framedObject = null;
   let activeLimits = config.controls;
-  // Quem precisa se remodelar quando a janela muda (a moldura da sala segue a
-  // proporcao da tela) roda antes do reenquadramento, senao a camera enquadraria
-  // a forma antiga.
   const resizeHooks = new Set();
   const resizeObserver = new ResizeObserver(() => {
     resize();
@@ -100,16 +80,11 @@ export function createStage(container) {
 
   renderer.setAnimationLoop((timestamp) => {
     timer.update(timestamp);
-    // O clamp existe para a aba que volta do segundo plano nao entregar um
-    // delta de varios segundos e teleportar as animacoes. O teto e generoso de
-    // proposito: cortar em 0.1s significaria que abaixo de 10 fps o tempo passa
-    // mais devagar que o relogio e o voo fica lento num aparelho fraco.
     const delta = Math.min(timer.getDelta(), 0.25);
     const elapsed = timer.getElapsed();
 
     for (const fn of updates) fn(delta, elapsed);
 
-    // update() devolve true enquanto a camera ainda se move (inclui o damping)
     const cameraMoved = controls.update(delta);
 
     if (needsRender || cameraMoved || updates.size > 0) {
@@ -118,35 +93,16 @@ export function createStage(container) {
     }
   });
 
-  /**
-   * Calcula - sem aplicar - a pose de camera que enquadra o objeto inteiro, a
-   * partir da sua bounding box, sem numeros magicos que quebram se o modelo
-   * mudar. Separado de `frameObject` porque a navegacao precisa do destino para
-   * animar ate ele, e nao de um teleporte.
-   *
-   * `direction` sobrescreve a direcao de visada (cada estacao tem a sua);
-   * `fitOffset` e a folga ao redor do objeto - a sala pede mais ar que o logo;
-   * `preserveOrbit` mantem a direcao atual, usado no resize para nao jogar fora
-   * a orbita que o usuario escolheu.
-   */
   function computeFrame(
     object,
     { direction, preserveOrbit = false, fitOffset = config.camera.fitOffset } = {},
   ) {
-    // Box3.setFromObject atualiza a matriz do objeto e dos filhos, mas nao a
-    // dos pais. Num link direto para uma estacao o enquadramento acontece antes
-    // do primeiro render, quando a cena inteira ainda esta com matriz
-    // identidade - e a sala, que so existe deslocada em z pelo grupo pai, seria
-    // medida na origem.
     object.updateWorldMatrix(true, true);
 
     const box = new Box3().setFromObject(object);
     const size = box.getSize(new Vector3());
     const center = box.getCenter(new Vector3());
 
-    // Enquadra pela largura e altura reais (o logo e largo e baixo; uma esfera
-    // envolvente desperdicaria metade da tela) e soma a profundidade, ja que a
-    // peca gira em Y e a espessura entra no enquadramento.
     const halfFovY = MathUtils.degToRad(camera.fov) * 0.5;
     const halfFovX = Math.atan(Math.tan(halfFovY) * camera.aspect);
 
@@ -167,13 +123,6 @@ export function createStage(container) {
     };
   }
 
-  /**
-   * Coloca a camera e os controls numa pose vinda de `computeFrame`.
-   *
-   * Os limites de orbita vem da estacao ativa, nao da config global: no about a
-   * peca e chapada e girar por tras dela nao faria sentido. Como ficam
-   * guardados em `activeLimits`, o reenquadramento do resize os preserva.
-   */
   function applyFrame({ position, target, distance }, limits = activeLimits) {
     camera.position.copy(position);
     camera.near = distance / 100;
@@ -215,12 +164,10 @@ export function createStage(container) {
     invalidate,
     computeFrame,
     applyFrame,
-    /** Quem o resize deve reenquadrar. `null` suspende o reenquadramento. */
     setFramedObject(object, limits) {
       framedObject = object;
       if (limits) activeLimits = limits;
     },
-    /** Afrouxa os limites de orbita durante um voo, para nao cortarem a curva. */
     releaseControlLimits() {
       controls.minPolarAngle = 0;
       controls.maxPolarAngle = Math.PI;

@@ -1,22 +1,6 @@
 import { QuadraticBezierCurve3, Vector3 } from 'three';
 import { config } from './config.js';
 
-/**
- * A viagem entre estacoes.
- *
- * A camera percorre uma curva de Bezier em vez de uma reta: o ponto de controle
- * (config.flight.arc) levanta o meio do caminho, entao ela sobe, passa por cima
- * da borda do logo e desce do outro lado. Em linha reta seria um zoom, e ainda
- * atravessaria a geometria bem no near plane.
- *
- * Durante o voo os limites de orbita sao afrouxados: o OrbitControls roda o
- * update() todo frame mesmo desabilitado, e as distancias minima/maxima da
- * estacao de origem recortariam a trajetoria pela metade. Quem reorienta a
- * camera para o alvo continua sendo ele - so a posicao e escrita aqui.
- *
- * A rota vive no hash da URL. Isso da de graca o botao voltar do navegador e um
- * link direto para cada lugar.
- */
 export function createNavigator({ stage, world, onEnter, onExit, reducedMotion = false }) {
   const { camera, controls } = stage;
   const baseFov = camera.fov;
@@ -36,11 +20,8 @@ export function createNavigator({ stage, world, onEnter, onExit, reducedMotion =
     });
   }
 
-  /** Assenta a camera na estacao e devolve os controles ao usuario. */
   function settle(station) {
     const limits = limitsOf(station);
-    // recalculado na chegada, nao no inicio: a janela pode ter sido
-    // redimensionada no meio do voo e o enquadramento depende do aspect
     stage.applyFrame(poseFor(station), limits);
     stage.setFramedObject(station.focus, limits);
   }
@@ -62,7 +43,7 @@ export function createNavigator({ stage, world, onEnter, onExit, reducedMotion =
       return;
     }
 
-    stage.setFramedObject(null); // um resize no meio do voo nao teleporta a camera
+    stage.setFramedObject(null);
     controls.enabled = false;
     stage.releaseControlLimits();
 
@@ -107,9 +88,6 @@ export function createNavigator({ stage, world, onEnter, onExit, reducedMotion =
     resetFov();
     settle(station);
 
-    // So agora o lugar de onde viemos some: durante o voo ele ainda esta em
-    // campo. Varrer todas as estacoes (em vez de so a anterior) tambem cobre o
-    // link direto, que chega sem passar por lugar nenhum.
     for (const other of Object.values(world.stations)) {
       if (other !== station) other.dismiss?.();
     }
@@ -135,14 +113,9 @@ export function createNavigator({ stage, world, onEnter, onExit, reducedMotion =
   }
   window.addEventListener('hashchange', onHashChange);
 
-  // A primeira estacao entra sem voo, inclusive num link direto para #/about.
   goTo(idFromHash(), { animate: false });
 
   return {
-    /**
-     * Navegacao vinda do usuario: escreve no hash e deixa o evento conduzir,
-     * para o historico do navegador registrar o passo.
-     */
     navigate(id) {
       const hash = id === 'home' ? '#/' : `#/${id}`;
       if (location.hash === hash) goTo(id);

@@ -1,23 +1,3 @@
-/**
- * Afina o contorno branco do logo, sem reexportar o modelo.
- *
- * O logo e uma fita extrudada: a tampa chapada (chrome_face) e o que se ve como
- * traco branco, e a parede chanfrada (steel_edge) faz a volta ate o fundo. O
- * traco sai do 3D 35% mais grosso que o desenho de referencia do logo.png, e no
- * tema escuro o branco puro ainda incha a leitura.
- *
- * Aqui cada vertice da BORDA da tampa anda para dentro da fita, por uma
- * distancia fixa, na direcao perpendicular a propria borda. Como isso acontece
- * nas duas bordas - a de fora e a de dentro da fita -, a tampa emagrece dos dois
- * lados. A silhueta externa da peca nao muda: quem cede e o chanfro, que fica um
- * fio mais largo. E como e geometria, o traco fica fino de qualquer angulo e o
- * runtime nao paga nada.
- *
- * Roda depois do `weld` - antes dele a malha e sopa de triangulos soltos, sem
- * aresta compartilhada, e nao existe "borda" para achar.
- *
- * Uso: node scripts/thin-outline.mjs entrada.glb saida.glb [recuo]
- */
 import { NodeIO } from '@gltf-transform/core';
 import { EXTMeshoptCompression, KHRMeshQuantization } from '@gltf-transform/extensions';
 import { MeshoptDecoder, MeshoptEncoder } from 'meshoptimizer';
@@ -25,9 +5,8 @@ import { MeshoptDecoder, MeshoptEncoder } from 'meshoptimizer';
 const [input, output, amount = '0.0014'] = process.argv.slice(2);
 const INSET = Number(amount);
 
-// Acima disso e tampa (normal quase paralela a Z); abaixo, parede.
 const CAP_NORMAL_Z = 0.9;
-const KEY = 1e6; // precisao da chave de posicao, ja que o weld unificou iguais
+const KEY = 1e6;
 
 const io = new NodeIO()
   .registerExtensions([EXTMeshoptCompression, KHRMeshQuantization])
@@ -38,7 +17,6 @@ const doc = await io.read(input);
 const primitives = [];
 for (const mesh of doc.getRoot().listMeshes()) primitives.push(...mesh.listPrimitives());
 
-/** Soma das direcoes "para fora" em cada vertice de borda, por posicao. */
 const outward = new Map();
 const key = (x, y) => `${Math.round(x * KEY)},${Math.round(y * KEY)}`;
 
@@ -52,7 +30,6 @@ for (const prim of primitives) {
   const count = indices ? indices.getCount() : position.getCount();
   const at = (i) => (indices ? indices.getScalar(i) : i);
 
-  // aresta -> quantas vezes aparece, e qual o terceiro vertice do triangulo
   const edges = new Map();
   for (let t = 0; t < count / 3; t += 1) {
     const tri = [at(t * 3), at(t * 3 + 1), at(t * 3 + 2)];
@@ -72,14 +49,13 @@ for (const prim of primitives) {
   const vo = [0, 0, 0];
 
   for (const edge of edges.values()) {
-    if (edge.count !== 1) continue; // so as arestas de borda interessam
+    if (edge.count !== 1) continue;
     bordas += 1;
 
     position.getElement(edge.a, va);
     position.getElement(edge.b, vb);
     position.getElement(edge.opposite, vo);
 
-    // perpendicular a aresta, no plano da tampa
     let nx = -(vb[1] - va[1]);
     let ny = vb[0] - va[0];
     const len = Math.hypot(nx, ny);
@@ -87,7 +63,6 @@ for (const prim of primitives) {
     nx /= len;
     ny /= len;
 
-    // aponta para longe do triangulo, ou seja, para fora da fita
     const mx = (va[0] + vb[0]) * 0.5;
     const my = (va[1] + vb[1]) * 0.5;
     if (nx * (vo[0] - mx) + ny * (vo[1] - my) > 0) {
@@ -108,8 +83,6 @@ for (const prim of primitives) {
   }
 }
 
-// Aplica o recuo em todo vertice que esteja sobre uma dessas posicoes - tampa e
-// tambem o inicio da parede, que precisa acompanhar para nao abrir fenda.
 const done = new Set();
 let movidos = 0;
 

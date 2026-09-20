@@ -11,13 +11,6 @@ import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import fontData from '../assets/font.json';
 
-/**
- * Texto extrudado, feito da mesma chapa que o logo.
- *
- * A fonte e o recorte gerado por scripts/build-font.mjs - 16 KB de glifos, nao
- * os 335 KB do TTF. O parse e caro o suficiente para valer o cache: uma vez por
- * sessao, mesmo que apareca meia duzia de rotulos.
- */
 let parsedFont = null;
 
 function getFont() {
@@ -25,51 +18,24 @@ function getFont() {
   return parsedFont;
 }
 
-/**
- * @param {string} text
- * @param {object} [options]
- * @param {number} [options.size]      altura em unidades de mundo
- * @param {number} [options.depth]     espessura da extrusao
- * @param {number} [options.tracking]  espacamento entre letras, em multiplos de size
- * @param {{x: number, y: number}} [options.padding]  folga da area clicavel,
- *   por padrao proporcional a `size` (alvo de toque confortavel no celular)
- * @returns {{ object: Group, mesh: Mesh, target: Mesh, applyTheme: Function, setHighlight: Function, dispose: Function }}
- */
 export function createText3D(text, options = {}) {
   const {
     size = 0.09,
     depth = 0.024,
     tracking = 0.18,
     curveSegments = 8,
-    // proporcional ao tamanho da letra: o alvo cresce junto com o rotulo, em
-    // vez de engolir a tela quando o texto e pequeno
     padding = { x: size * 0.7, y: size * 1.3 },
     name = 'text3d',
   } = options;
 
   const geometry = layout(text, { size, depth, tracking, curveSegments });
 
-  // As tampas sao MeshBasicMaterial de proposito: a cor precisa ser exata para
-  // o repouso e o hover serem dois valores previsiveis, e material sem luz e
-  // imune a mudanca de iluminacao entre temas. As paredes ficam com
-  // MeshStandardMaterial, iguais as do logo, para a peca ganhar volume quando o
-  // usuario gira a cena - e sumirem no fundo quando ele nao gira.
   const face = new MeshBasicMaterial({ name: `${name}:face` });
   const side = new MeshStandardMaterial({ name: `${name}:side` });
 
   const mesh = new Mesh(geometry, [face, side]);
   mesh.name = `${name}:mesh`;
 
-  // Area clicavel separada da letra.
-  //
-  // Mirar nos glifos nao funciona: o raio passa pelos buracos e - pior - o
-  // centro geometrico de "about us" cai bem no espaco entre as duas palavras,
-  // entao o ponto mais obvio para o usuario apontar era justamente o unico que
-  // nao acertava nada. O retangulo tambem e o que da um alvo de toque decente
-  // no celular, onde nao existe mira fina.
-  //
-  // material.visible = false: o renderer pula o desenho, mas o raycaster nao
-  // olha essa propriedade - que e exatamente o que se quer aqui.
   const box = geometry.boundingBox;
   const hitGeometry = new PlaneGeometry(
     box.max.x - box.min.x + padding.x * 2,
@@ -95,7 +61,6 @@ export function createText3D(text, options = {}) {
   return {
     object,
     mesh,
-    /** O que o raycaster testa. */
     target,
 
     applyTheme(preset) {
@@ -112,7 +77,6 @@ export function createText3D(text, options = {}) {
       side.needsUpdate = true;
     },
 
-    /** 0 = repouso, 1 = aceso. O picker anima esse valor. */
     setHighlight(amount) {
       highlight = Math.min(Math.max(amount, 0), 1);
       paint();
@@ -128,18 +92,6 @@ export function createText3D(text, options = {}) {
   };
 }
 
-/**
- * Monta a linha letra por letra para poder abrir o espacamento.
- *
- * TextGeometry so aceita a string inteira e usa as metricas da fonte, sem
- * tracking - e o site inteiro e escrito com letter-spacing largo (style.css).
- * Cada glifo vira uma geometria propria, deslocada no X; depois tudo funde em
- * uma so, para o botao custar um draw call por material em vez de um por letra.
- *
- * mergeGeometries(geoms, true) nao serve aqui: ele numera os grupos pela ordem
- * das geometrias, o que jogaria fora a separacao entre tampa (0) e parede (1)
- * que o ExtrudeGeometry produz. Por isso os grupos sao remontados na mao.
- */
 function layout(text, { size, depth, tracking, curveSegments }) {
   const font = getFont();
   const unit = size / font.data.resolution;

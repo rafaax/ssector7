@@ -1,31 +1,9 @@
-/**
- * TTF -> typeface.json, so com os glifos que a pagina usa.
- *
- * Mesma ideia do scripts/optimize-model.sh: o passo pesado roda offline e so o
- * resultado pequeno entra no repo. Aqui a fonte inteira tem 343 KB e o recorte
- * que o site precisa cabe em poucos KB.
- *
- * Nao da para fazer isso em runtime: o TTFLoader do three importa a opentype de
- * um CDN (examples/jsm/loaders/TTFLoader.js), o que quebraria o build e criaria
- * uma dependencia externa numa pagina que hoje nao tem nenhuma. A rotina
- * convert() abaixo e a mesma daquele loader, so que com o filtro de glifos.
- *
- * A fonte de origem (source/mono.ttf) e a DejaVu Sans Mono, sob a licenca
- * Bitstream Vera / Arev - redistribuicao e modificacao liberadas. E a mesma
- * familia monoespacada que o CSS ja pede via ui-monospace, entao o texto 3D e o
- * texto em HTML falam com a mesma voz.
- *
- * Uso: npm run build:font
- */
 import { readFileSync, writeFileSync } from 'node:fs';
 import opentype from 'opentype.js';
 
 const SRC = process.argv[2] ?? 'source/mono.ttf';
 const OUT = process.argv[3] ?? 'src/assets/font.json';
 
-// A UI e toda minuscula (text-transform: lowercase no style.css). Guardamos o
-// alfabeto inteiro mais digitos e pontuacao basica para que um rotulo novo -
-// "work", "contact" - nao obrigue a regerar a fonte.
 const GLYPHS = new Set(' abcdefghijklmnopqrstuvwxyz0123456789-.,:/()&+');
 
 const font = opentype.parse(toArrayBuffer(readFileSync(SRC)));
@@ -41,7 +19,6 @@ function toArrayBuffer(buffer) {
   return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
 }
 
-/** Portado de three/examples/jsm/loaders/TTFLoader.js, com o filtro de glifos. */
 function convert(font, keep) {
   const round = Math.round;
   const glyphs = {};
@@ -62,7 +39,6 @@ function convert(font, keep) {
     };
 
     for (const command of glyph.path.commands) {
-      // no formato typeface a curva cubica se chama 'b'
       const type = command.type.toLowerCase() === 'c' ? 'b' : command.type.toLowerCase();
       token.o += `${type} `;
 

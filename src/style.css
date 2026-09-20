@@ -1,5 +1,3 @@
-/* Tema escuro (fase 1): fundo preto, contorno branco - igual ao logo.png.
-   O tema e escolhido em src/config.js, que escreve data-theme no <html>. */
 :root,
 :root[data-theme='dark'] {
   --bg: #07090c;
@@ -7,21 +5,13 @@
   --backdrop: radial-gradient(120% 80% at 50% 38%, #14161a 0%, #0a0b0d 45%, var(--bg) 100%);
   --loader-track: #1d2430;
   --loader-fill: #cfd8e0;
-  /* Como misturar os pngs do logo (fundo preto solido) com o que estiver por
-     tras - o fallback sem WebGL e o logo girando no header. screen: o preto
-     some, so a linha branca fica. */
   --logo-blend: screen;
   color-scheme: dark;
 }
 
-/* Tema claro (fase 2): fundo branco, contorno preto. */
 :root[data-theme='light'] {
   --bg: #f7f7f8;
   --fg: #6b7480;
-  /* Fundo chapado, exatamente a cor de fundo do logo_light.png (#f7f7f8).
-     Assim os pngs do logo encostam no fundo sem desenhar retangulo - e por
-     isso o tema claro nao usa blend. No tema escuro o gradiente funciona
-     porque o fundo preto puro do png e neutro para o mix-blend-mode screen. */
   --backdrop: var(--bg);
   --loader-track: #dcdfe4;
   --loader-fill: #2b3038;
@@ -40,9 +30,6 @@ body {
   overflow: hidden;
 }
 
-/* O html leva a cor chapada e o body leva o gradiente: com o html pintado, o
-   fundo do body deixa de ser propagado para o canvas da pagina e vira um
-   backdrop de verdade - e o mix-blend-mode do fallback passa a compor com ele. */
 html {
   background: var(--bg);
 }
@@ -74,7 +61,6 @@ body {
   touch-action: none;
 }
 
-/* overlay de carregamento */
 .loader {
   position: fixed;
   inset: 0;
@@ -91,10 +77,6 @@ body {
   pointer-events: none;
 }
 
-/* O globo herda a cor do tema por currentColor. As espessuras vivem em
-   unidades do viewBox, e nao em px via non-scaling-stroke: com esse efeito
-   ligado o navegador passa a medir o tracejado em espaco de tela e ignora o
-   pathLength, o que deixava o anel de progresso sempre cheio. */
 .loader__globe {
   width: min(220px, 48vw);
   height: auto;
@@ -110,7 +92,6 @@ body {
   font-size: 10px;
 }
 
-/* sem WebGL / sem JS: mostra o logo 2D */
 .fallback {
   position: fixed;
   inset: 0;
@@ -118,9 +99,6 @@ body {
   place-content: center;
   justify-items: center;
   padding: 24px;
-  /* o png tem fundo chapado; o blend funde ele no gradiente.
-     Vai no wrapper (que e position:fixed, logo um contexto de empilhamento
-     proprio): dentro dele a img so comporia com um backdrop transparente. */
   mix-blend-mode: var(--logo-blend);
 }
 
@@ -145,18 +123,12 @@ body {
   }
 }
 
-/* camada de HTML por cima da cena */
 .ui {
   position: fixed;
   inset: 0;
-  /* o layer inteiro e transparente ao ponteiro para o arrasto da cena
-     continuar funcionando; so o header e o texto do about voltam a receber
-     eventos */
   pointer-events: none;
 }
 
-/* Header transparente no topo - substitui o antigo botao 3D do "about us".
-   Sem fundo de proposito: a cena continua visivel por tras da letra. */
 .site-header {
   position: fixed;
   inset: 0 0 auto 0;
@@ -165,10 +137,6 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: clamp(16px, 3.4vw, 32px) clamp(20px, 4vw, 40px);
-  /* Escondido ate a cena ficar pronta (#stage.is-ready, ligado em main.js):
-     enquanto o loader do globo gira, so ele pode aparecer na tela. visibility
-     (em vez de so opacity) tambem tira o header do foco por Tab nesse meio
-     tempo, mesmo com .brand/.nav-link pedindo pointer-events:auto. */
   opacity: 0;
   visibility: hidden;
   transition: opacity 700ms ease, visibility 0s linear 700ms;
@@ -192,9 +160,6 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* O giro em 3D do logo, contido no header. `perspective` no pai e o que da
-   volume ao rotateY do filho - sem ele a rotacao achataria num flip sem
-   profundidade. */
 .brand__stage {
   position: relative;
   display: block;
@@ -203,11 +168,6 @@ body {
   perspective: 500px;
 }
 
-/* O png (mesmo do fallback sem WebGL) tem fundo preto solido - o blend
-   funde esse fundo no que estiver atras, deixando so o traco do logo. As
-   duas versoes ficam empilhadas por cima uma da outra; qual delas se ve e
-   so display, trocado pelo data-theme no <html> (src/theme.js), sem
-   nenhum JS aqui. */
 .brand__logo {
   position: absolute;
   inset: 0;
@@ -262,11 +222,6 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Janela de uma linha por cima de duas copias do texto empilhadas: o hover
-   desliza a pilha para cima, como se a segunda copia "subisse" no lugar da
-   primeira. A copia de baixo ja nasce na cor de foco (--loader-fill), entao o
-   gesto troca o texto e acende a cor no mesmo movimento - sem transition de
-   color por cima, que junto com o transform deixaria o efeito emperrado. */
 .nav-link__viewport {
   display: block;
   overflow: hidden;
@@ -307,8 +262,6 @@ body {
   }
 }
 
-/* Espelho acessivel de um rotulo 3D: existe para o Tab, nao para o olho.
-   Quem sinaliza o foco e o proprio rotulo na cena, que acende. */
 .nav-mirror {
   position: absolute;
   width: 1px;
@@ -321,19 +274,11 @@ body {
   white-space: nowrap;
 }
 
-/* O bloco do about. Posicao e largura vem do JS, que projeta a moldura 3D na
-   tela - por isso o tamanho do texto e relativo ao container (cqw) e nao a
-   viewport: o texto encolhe junto com a moldura quando a camera se afasta. */
 .room {
   position: absolute;
   transform: translate(-50%, -50%);
   container-type: inline-size;
-  /* multiplicador que o overlay ajusta para o texto caber na moldura */
   --fit: 1;
-  /* so as laterais: padding vertical em % resolve contra a LARGURA do bloco,
-     entao um valor unico deslocaria o texto de um jeito no desktop e de outro
-     no celular. O equilibrio vertical vem do proprio 3D - o bloco e centrado
-     na moldura, e o "voltar" ancora a base. */
   padding: 0 7%;
   text-align: center;
   opacity: 0;
@@ -350,8 +295,6 @@ body {
 
 .room__title {
   margin: 0 0 calc(3.5cqw * var(--fit));
-  /* o max() e o piso de legibilidade: por mais que --fit encolha para o texto
-     caber, a letra nao desce de um tamanho que ainda se le */
   font-size: max(12px, calc(clamp(12px, 4.2cqw, 26px) * var(--fit)));
   font-weight: 400;
   letter-spacing: 0.34em;
@@ -360,8 +303,6 @@ body {
 
 .room__text {
   margin: 0 auto calc(2.6cqw * var(--fit));
-  /* medida larga de proposito: com linha curta um texto de dois paragrafos
-     vira uma coluna alta e ragged no meio do quadro */
   max-width: 68ch;
   font-size: max(11px, calc(clamp(11px, 3.2cqw, 17px) * var(--fit)));
   line-height: 1.95;

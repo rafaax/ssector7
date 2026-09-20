@@ -1,11 +1,5 @@
 import { defineConfig } from 'vite';
 
-/**
- * Injeta no <head> o preload do modelo 3D com o nome ja hasheado pelo build.
- * O preload nao pode ser escrito a mao no index.html porque o nome do arquivo
- * muda a cada versao do modelo - e e ele que faz o download de 1,3 MB comecar
- * junto com o JS, em vez de so depois que o bundle roda.
- */
 function preloadModel() {
   let base = '/';
 
@@ -34,7 +28,6 @@ function preloadModel() {
 }
 
 export default defineConfig({
-  // Se um dia publicar em GitHub Pages sob /ssector7/, troque para base: '/ssector7/'.
   base: '/',
   assetsInclude: ['**/*.glb'],
   plugins: [preloadModel()],
