@@ -140,17 +140,11 @@ export const config = {
    * `background` alimenta a meta theme-color; o fundo visivel vem do CSS.
    * `fallbackImage` e o png mostrado quando nao ha WebGL ou o modelo falha -
    * um por tema, porque o traco precisa contrastar com o fundo.
-   * `favicon` troca o icone da aba junto com o tema.
    */
   themes: {
     dark: {
       background: 0x07090c,
       fallbackImage: 'logo.png',
-      favicon: {
-        png: 'favicons/files/favicon-dark-192.png',
-        pngSizes: '192x192',
-        apple: 'favicons/files/favicon-dark-180.png',
-      },
       // Sem environment map: o RoomEnvironment e claro demais e lava a parede
       // escura (mesmo a 8% de intensidade ela subia de 1 para 29/255).
       // Aqui o visual e grafico e chapado, quem ilumina sao so as luzes.
@@ -194,12 +188,6 @@ export const config = {
     light: {
       background: 0xf7f7f8,
       fallbackImage: 'logo_light.png',
-      // so existe o 512 na versao clara; o navegador reduz sem problema
-      favicon: {
-        png: 'favicons/files/favicon-light-512.png',
-        pngSizes: '512x512',
-        apple: 'favicons/files/favicon-light-512.png',
-      },
       // No tema claro a massa e branca: o environment ajuda a modelar a forma.
       environment: true,
       toneMapping: 'aces',

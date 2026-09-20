@@ -96,15 +96,10 @@
         visibility: hidden;
       }
     </style>
-    <link rel="icon" href="/favicons/files/favicon.ico" sizes="16x16" />
-    <link
-      id="favicon-png"
-      rel="icon"
-      type="image/png"
-      sizes="192x192"
-      href="/favicons/files/favicon-dark-192.png"
-    />
-    <link id="favicon-apple" rel="apple-touch-icon" href="/favicons/files/favicon-dark-180.png" />
+    <!-- sem favicon de proposito - o data-uri vazio evita a requisicao
+         automatica de /favicon.ico que o navegador faria sem nenhum
+         <link rel="icon">. -->
+    <link rel="icon" href="data:," />
     <meta property="og:title" content="SSECTOR7" />
     <meta property="og:description" content="contracultura digital" />
   </head>

@@ -51,23 +51,13 @@ export function msUntilNextChange(now = new Date()) {
   return Math.max(1000, target.getTime() - now.getTime());
 }
 
-/** Escreve o tema no <html>, na meta theme-color e nos icones da aba. */
+/** Escreve o tema no <html> e na meta theme-color. */
 export function applyThemeToDocument(name) {
   const preset = config.themes[name];
   document.documentElement.dataset.theme = name;
 
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.content = `#${preset.background.toString(16).padStart(6, '0')}`;
-
-  setIcon('favicon-png', preset.favicon.png, preset.favicon.pngSizes);
-  setIcon('favicon-apple', preset.favicon.apple);
-}
-
-function setIcon(id, file, sizes) {
-  const link = document.getElementById(id);
-  if (!link) return;
-  link.href = `${import.meta.env.BASE_URL}${file}`;
-  if (sizes) link.sizes = sizes;
 }
 
 /**
