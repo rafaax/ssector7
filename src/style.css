@@ -7,7 +7,10 @@
   --backdrop: radial-gradient(120% 80% at 50% 38%, #14161a 0%, #0a0b0d 45%, var(--bg) 100%);
   --loader-track: #1d2430;
   --loader-fill: #cfd8e0;
-  --fallback-blend: screen; /* o png e linha branca sobre preto */
+  /* Como misturar os pngs do logo (fundo preto solido) com o que estiver por
+     tras - o fallback sem WebGL e o logo girando no header. screen: o preto
+     some, so a linha branca fica. */
+  --logo-blend: screen;
   color-scheme: dark;
 }
 
@@ -16,13 +19,13 @@
   --bg: #f7f7f8;
   --fg: #6b7480;
   /* Fundo chapado, exatamente a cor de fundo do logo_light.png (#f7f7f8).
-     Assim o png do fallback encosta no fundo sem desenhar retangulo - e por
+     Assim os pngs do logo encostam no fundo sem desenhar retangulo - e por
      isso o tema claro nao usa blend. No tema escuro o gradiente funciona
      porque o fundo preto puro do png e neutro para o mix-blend-mode screen. */
   --backdrop: var(--bg);
   --loader-track: #dcdfe4;
   --loader-fill: #2b3038;
-  --fallback-blend: normal;
+  --logo-blend: normal;
   color-scheme: light;
 }
 
@@ -118,7 +121,7 @@ body {
   /* o png tem fundo chapado; o blend funde ele no gradiente.
      Vai no wrapper (que e position:fixed, logo um contexto de empilhamento
      proprio): dentro dele a img so comporia com um backdrop transparente. */
-  mix-blend-mode: var(--fallback-blend);
+  mix-blend-mode: var(--logo-blend);
 }
 
 .fallback img {
@@ -154,10 +157,79 @@ body {
    Sem fundo de proposito: a cena continua visivel por tras da letra. */
 .site-header {
   position: fixed;
-  top: 0;
-  right: 0;
+  inset: 0 0 auto 0;
   z-index: 1;
-  padding: clamp(20px, 4vw, 40px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(16px, 3.4vw, 32px) clamp(20px, 4vw, 40px);
+}
+
+.brand {
+  pointer-events: auto;
+  display: block;
+  background: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* O giro em 3D do logo, contido no header. `perspective` no pai e o que da
+   volume ao rotateY do filho - sem ele a rotacao achataria num flip sem
+   profundidade. */
+.brand__stage {
+  position: relative;
+  display: block;
+  height: clamp(22px, 3.6vw, 30px);
+  width: calc(clamp(22px, 3.6vw, 30px) * 917 / 328);
+  perspective: 500px;
+}
+
+/* O png (mesmo do fallback sem WebGL) tem fundo preto solido - o blend
+   funde esse fundo no que estiver atras, deixando so o traco do logo. As
+   duas versoes ficam empilhadas por cima uma da outra; qual delas se ve e
+   so display, trocado pelo data-theme no <html> (src/theme.js), sem
+   nenhum JS aqui. */
+.brand__logo {
+  position: absolute;
+  inset: 0;
+  display: block;
+  height: 100%;
+  width: 100%;
+  mix-blend-mode: var(--logo-blend);
+  backface-visibility: visible;
+  animation: brand-spin 7s linear infinite;
+  will-change: transform;
+}
+
+.brand__logo--light {
+  display: none;
+}
+
+:root[data-theme='light'] .brand__logo--dark {
+  display: none;
+}
+
+:root[data-theme='light'] .brand__logo--light {
+  display: block;
+}
+
+@keyframes brand-spin {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand__logo {
+    animation-duration: 1ms;
+  }
 }
 
 .nav-link {
